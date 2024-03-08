@@ -1,0 +1,9 @@
+.list > li + li :global(.device-pixel-ratio-border) {
+  @apply border-t;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2) {
+  .list > li + li :global(.device-pixel-ratio-border) {
+    @apply border-t-[calc(1px/2)];
+  }
+}

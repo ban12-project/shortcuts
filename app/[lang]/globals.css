@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  a,
+  input,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .hidden-scrollbar {
+    scrollbar-width: none; /* Firefox */
+  }
+  .hidden-scrollbar::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+
+  .mask-image-paint-smooth-corners {
+    mask-image: paint(smooth-corners);
+  }
+}

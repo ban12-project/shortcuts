@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model Shortcut {
+  id              Int              @id @default(autoincrement())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  icloud          String
+  name            String
+  description     String
+  icon            String
+  backgroundColor String
+  details         ShortcutDetail[]
+  language        String           @default("zh-CN")
+  Gallery         Gallery?         @relation(fields: [galleryId], references: [id])
+  galleryId       Int?
+  Album           Album?           @relation(fields: [albumId], references: [id])
+  albumId         Int?
+}
+
+enum ShortcutDetail {
+  // Appears in share sheet
+  SHARE_SHEET
+  // Appears on Apple Watch
+  APPLE_WATCH
+  // Appears in menu bar on mac
+  MENU_BAR_ON_MAC
+  // Appears in quick actions on mac
+  QUICK_ACTIONS_ON_MAC
+  // Receives What's On Screen
+  RECEIVES_SCREEN
+}
+
+model Gallery {
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  title       Json
+  description Json
+  shortcuts   Shortcut[]
+  Album       Album?     @relation(fields: [albumId], references: [id])
+  albumId     Int?
+}
+
+model Album {
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  title     Json
+  image     String
+  shortcuts Shortcut[]
+  galleries Gallery[]
+}
