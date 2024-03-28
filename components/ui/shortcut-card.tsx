@@ -1,13 +1,14 @@
-import Link, { LinkProps } from 'next/link'
+import { LinkProps } from 'next/link'
 import { Layers2, Plus } from 'lucide-react'
 
 import { cn } from '#/lib/utils'
+import Link from '#/components/link'
 
-import { Shortcut } from './shortcut-gallery-list'
+import { Shortcut } from './albums-list'
 
 interface ShortcutCardProps
-  extends React.ButtonHTMLAttributes<HTMLAnchorElement>,
-    LinkProps {
+  extends LinkProps,
+    Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps> {
   item: Shortcut
 }
 

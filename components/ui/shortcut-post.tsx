@@ -1,7 +1,9 @@
 'use client'
 
-import {
+import React, {
+  createContext,
   forwardRef,
+  useContext,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -9,16 +11,15 @@ import {
 } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Messages } from '#/get-dictionary'
-import {
-  SubmitHandler,
-  useForm,
-  useFormContext,
-  useWatch,
-} from 'react-hook-form'
+import { Loader, Loader2 } from 'lucide-react'
+import { useFormState, useFormStatus } from 'react-dom'
+import { useForm, useFormContext } from 'react-hook-form'
 import * as z from 'zod'
 
-import { ShortcutRecord } from '#/app/api/icloud/[uuid]/shortcut'
+import { getShortcutByiCloud } from '#/lib/actions'
+import { useLocale } from '#/components/i18n'
 
+import { Button } from './button'
 import {
   Form,
   FormControl,
@@ -52,13 +53,13 @@ const icloudSchema = z.object({
     .startsWith(
       'https://www.icloud.com/shortcuts/',
       'must be start with https://www.icloud.com/shortcuts/',
-    ),
+    )
+    .regex(/\/[0-9a-f]{32}\/?$/, 'iCloud url is broken'),
 })
 
 const shortcutSchema = z.object({
-  icloud: z.string().url(),
   name: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   icon: z.string().optional(),
   backgroundColor: z.string(),
   details: z.array(
@@ -70,10 +71,10 @@ const shortcutSchema = z.object({
       'RECEIVES_SCREEN',
     ]),
   ),
-  language: z.enum(['zh_CN', 'en']),
+  language: z.string(),
 })
 
-const formSchema = z.union([icloudSchema, shortcutSchema])
+const formSchema = z.intersection(icloudSchema, shortcutSchema)
 
 type FormSchemaType = z.infer<typeof formSchema>
 
@@ -96,23 +97,74 @@ const details = [
   },
 ] as const
 
+type FormStatus = ReturnType<typeof useFormStatus>
+type FormStatusContextValue = {
+  status: FormStatus
+  setStatus: (pending: FormStatus) => void
+}
+
+const FormStatusContext = createContext<FormStatusContextValue>(
+  {} as FormStatusContextValue,
+)
+
+const initialState = { message: '', errors: {} }
+
+const SubmitButton = React.forwardRef<React.ElementRef<'button'>>(
+  function SubmitButton(props, ref) {
+    const status = useFormStatus()
+
+    const { setStatus } = useContext(FormStatusContext)
+    useEffect(() => {
+      setStatus(status)
+    }, [setStatus, status])
+
+    return (
+      <button
+        ref={ref}
+        type="submit"
+        className="sr-only"
+        aria-disabled={status.pending}
+      >
+        Submit
+      </button>
+    )
+  },
+)
+
 const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
   function FormComponent({ messages }, ref) {
     const form = useFormContext<FormSchemaType>()
+    const [state, dispatch] = useFormState(getShortcutByiCloud, initialState)
 
-    const onSubmit: SubmitHandler<FormSchemaType> = async (values) => {
-      const uuid = getShortcutUUIDFromPath(values.icloud)
-      if (!uuid) return
-
-      const res = await fetch(`/api/shortcut/icloud/${uuid}`)
-      if (!res.ok) {
-        throw new Error('Failed to fetch data')
-      }
-      const data: ShortcutRecord = await res.json()
+    const handleAction = async (formData: FormData) => {
+      const isValid = await form.trigger()
+      if (!isValid) return
+      await dispatch(formData)
     }
+
+    useEffect(() => {
+      if (!state.data) return
+
+      // fill the form with data from icloud
+      form.setValue('name', state.data.fields.name.value)
+      form.setValue(
+        'backgroundColor',
+        state.data.fields.icon_color.value.toString(),
+      )
+
+      if (state.data.recordType === 'SharedShortcut') {
+        form.setValue('icon', state.data.fields.icon.value.downloadURL)
+      }
+
+      if (state.data.recordType === 'GalleryShortcut') {
+        form.setValue('description', state.data.fields.longDescription.value)
+        form.setValue('language', state.data.fields.language.value)
+      }
+    }, [form, state.data])
 
     const buttonRef = useRef<React.ElementRef<'button'> | null>(null)
 
+    // useImperativeHandle is used to expose the submit function
     useImperativeHandle(
       ref,
       () => {
@@ -127,8 +179,8 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
 
     return (
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="p-safe-max-4 flex-1 space-y-8 overflow-y-auto"
+        action={handleAction}
+        className="flex-1 space-y-8 overflow-y-auto p-safe-max-4"
       >
         <FormField
           control={form.control}
@@ -203,7 +255,7 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
           )}
         />
 
-        {details.map((item) => (
+        {/* {details.map((item) => (
           <FormField
             key={item.label}
             control={form.control}
@@ -227,7 +279,7 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
                                 return checked
                                   ? field.onChange([...field.value, item])
                                   : field.onChange(
-                                      field.value?.filter(
+                                      field.value.filter(
                                         (value) => value !== item,
                                       ),
                                     )
@@ -243,7 +295,7 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
               </FormItem>
             )}
           />
-        ))}
+        ))} */}
 
         <FormField
           control={form.control}
@@ -269,24 +321,18 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
           )}
         />
 
-        <button ref={buttonRef} type="submit" className="sr-only">
-          Submit
-        </button>
+        <SubmitButton ref={buttonRef} />
       </form>
     )
   },
 )
 
-function getShortcutUUIDFromPath(path: string) {
-  const segments = path.split('/')
-  const last = segments[segments.length - 1]
-  if (last.match(/[0-9a-f]{32}/)) return last
-}
-
 export default function ShortcutPost({
   messages,
   drawer = false,
 }: ShortcutPostProps) {
+  const { locale: language } = useLocale()
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -296,7 +342,7 @@ export default function ShortcutPost({
       icon: '',
       backgroundColor: '',
       details: [],
-      language: undefined,
+      language,
     },
   })
 
@@ -305,12 +351,17 @@ export default function ShortcutPost({
     formRef.current?.submit()
   }
 
+  const [status, setStatus] = useState<FormStatus>({
+    pending: false,
+  } as FormStatus)
   return (
     <Form {...form}>
       {drawer ? (
-        <Drawer messages={messages.common} submit={submit}>
-          <FormComponent messages={messages} ref={formRef} />
-        </Drawer>
+        <FormStatusContext.Provider value={{ status, setStatus }}>
+          <Drawer messages={messages.common} submit={submit}>
+            <FormComponent messages={messages} ref={formRef} />
+          </Drawer>
+        </FormStatusContext.Provider>
       ) : (
         <FormComponent messages={messages} />
       )}
@@ -319,42 +370,50 @@ export default function ShortcutPost({
 }
 
 function NextButton({
-  onNext,
   messages,
+  submit,
 }: {
-  onNext: () => boolean
   messages: Messages['common']
+  submit: FormHandler['submit']
 }) {
-  const { trigger, control } = useFormContext<FormSchemaType>()
-  const [disabled, setDisabled] = useState(true)
+  const { trigger } = useFormContext<FormSchemaType>()
   const [isLastStep, setIsLastStep] = useState(false)
-
-  const icloud = useWatch({
-    control,
-    name: 'icloud',
-    defaultValue: '',
-  })
+  const {
+    status: { pending, data },
+  } = useContext(FormStatusContext)
+  const { formState, getValues } = useFormContext<FormSchemaType>()
 
   useEffect(() => {
-    setDisabled(!icloud)
-  }, [icloud])
+    // check icloud field is dirty
+    // if server actions return value equals form icloud value then set isLastStep to true
+    if (
+      !formState.dirtyFields.icloud &&
+      data?.get('icloud') === getValues('icloud')
+    ) {
+      setIsLastStep(true)
+    } else {
+      setIsLastStep(false)
+    }
+  }, [data, formState.dirtyFields, getValues])
 
   const onClick = async () => {
     const isValid = await trigger('icloud', { shouldFocus: true })
-
     if (!isValid) return
-    const isLastStep = onNext()
-    setIsLastStep(isLastStep)
+
+    submit()
   }
 
   return (
-    <button
-      className="text-blue-500 active:text-blue-500/80 disabled:text-zinc-300 dark:disabled:text-zinc-700"
+    <Button
+      variant="ios"
+      size="auto"
+      type="submit"
       onClick={onClick}
-      disabled={disabled}
+      disabled={pending}
     >
+      {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       {isLastStep ? messages.done : messages.next}
-    </button>
+    </Button>
   )
 }
 
@@ -379,13 +438,6 @@ function Drawer({
     return nextIndex === snapPoints.length - 1
   }
 
-  // when snap is last point emit submit
-  useEffect(() => {
-    const lastPoint = snapPoints[snapPoints.length - 1]
-    if (snap === lastPoint) submit()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [snap])
-
   return (
     <PageDrawer
       snapPoints={snapPoints}
@@ -394,7 +446,7 @@ function Drawer({
       setActiveSnapPoint={setSnap}
       messages={messages}
       className="flex h-full max-h-[96%] flex-col"
-      header={<NextButton onNext={onNext} messages={messages} />}
+      header={<NextButton messages={messages} submit={submit} />}
     >
       {children}
     </PageDrawer>

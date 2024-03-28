@@ -7,9 +7,9 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window'
 import { useResponsive } from '#/hooks/use-responsive'
 
 import ShortcutCard from './shortcut-card'
-import { Shortcut } from './shortcut-gallery-list'
+import { Shortcut } from './albums-list'
 
-type ShortcutsGalleryProps = {
+type AlbumsProps = {
   shortcuts: Shortcut[]
 }
 
@@ -62,7 +62,7 @@ const Column: React.ComponentType<ListChildComponentProps<Shortcut[]>> = ({
   />
 )
 
-export default function ShortcutsGallery({ shortcuts }: ShortcutsGalleryProps) {
+export default function Albums({ shortcuts }: AlbumsProps) {
   const ref = useRef<React.ElementRef<'div'>>(null)
   const size = useSize(ref)
 

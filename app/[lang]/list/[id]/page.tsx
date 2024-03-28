@@ -3,7 +3,7 @@ import { getDictionary } from '#/get-dictionary'
 import { Locale } from '#/i18n-config'
 
 import ShortcutCard from '#/components/ui/shortcut-card'
-import { getShortcuts } from '#/components/ui/shortcut-gallery-list'
+import { getShortcuts } from '#/components/ui/albums-list'
 
 type ListPageProps = {
   params: { id: string; lang: Locale }

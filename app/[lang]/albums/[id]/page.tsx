@@ -2,16 +2,14 @@ import { Metadata } from 'next'
 import { getDictionary } from '#/get-dictionary'
 import { Locale } from '#/i18n-config'
 
-import ShortcutsGalleryList, {
-  getShortcuts,
-} from '#/components/ui/shortcut-gallery-list'
+import Albums, { getShortcuts } from '#/components/ui/albums-list'
 
 type AlbumsPageProps = {
   params: { id: string; lang: Locale }
 }
 
 export default async function AlbumsPage({ params }: AlbumsPageProps) {
-  const [messages, gallery] = await Promise.all([
+  const [messages, albums] = await Promise.all([
     getDictionary(params.lang),
     getShortcuts(Number.parseInt(params.id)),
   ])
@@ -21,7 +19,7 @@ export default async function AlbumsPage({ params }: AlbumsPageProps) {
       <h2 className="overflow-hidden text-ellipsis whitespace-nowrap text-3xl font-bold pt-safe-max-4 px-safe-max-4">
         实用的小组件快捷指令
       </h2>
-      <ShortcutsGalleryList messages={messages} albums={gallery} />
+      <Albums messages={messages} albums={albums} />
     </main>
   )
 }

@@ -81,23 +81,30 @@ interface GalleryShortcutFields extends BaseFields {
   }
 }
 
-export type ShortcutRecord = {
-  created: {
-    userRecordName: string
-    timestamp: number
-    deviceID: string
-  }
-  deleted: boolean
-  fields: Partial<SharedShortcutFields> &
-    Partial<GalleryShortcutFields> &
-    BaseFields
-  modified: {
-    deviceID: string
-    userRecordName: string
-    timestamp: number
-  }
-  pluginFields: {}
-  recordChangeTag: string
-  recordName: string
-  recordType: 'GalleryShortcut' | 'SharedShortcut'
+enum RecordType {
+  GalleryShortcut = 'GalleryShortcut',
+  SharedShortcut = 'SharedShortcut',
 }
+export type ShortcutRecord = {
+  [Type in RecordType]: {
+    created: {
+      userRecordName: string
+      timestamp: number
+      deviceID: string
+    }
+    deleted: boolean
+    modified: {
+      deviceID: string
+      userRecordName: string
+      timestamp: number
+    }
+    pluginFields: {}
+    recordChangeTag: string
+    recordName: string
+    recordType: Type
+    fields: {
+      [RecordType.GalleryShortcut]: GalleryShortcutFields
+      [RecordType.SharedShortcut]: SharedShortcutFields
+    }[Type]
+  }
+}[RecordType]

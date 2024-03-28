@@ -7,6 +7,8 @@ import { Drawer } from 'vaul'
 
 import { cn } from '#/lib/utils'
 
+import { Button } from './button'
+
 type PageDrawerProps = React.ComponentProps<typeof Drawer.Root> &
   React.InputHTMLAttributes<HTMLDivElement> & {
     header?: React.ReactNode
@@ -27,7 +29,7 @@ export default function PageDrawer({
   const onClose = () => {
     setTimeout(() => {
       router.back()
-    }, 0)
+    }, 300) // delay 300ms to wait for drawer close animation
   }
 
   return (
@@ -36,17 +38,14 @@ export default function PageDrawer({
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40" />
         <Drawer.Content
           className={cn(
-            'fixed bottom-0 left-0 right-0 z-50 flex h-[96%] flex-col rounded-t-[10px] bg-white outline-none will-change-transform dark:bg-black',
+            'fixed bottom-0 left-0 right-0 z-50 flex h-[96%] flex-col rounded-t-[10px] bg-white outline-none dark:bg-black',
             className,
           )}
         >
-          <div className="p-safe-max-4 flex justify-between">
-            <button
-              className="text-lg text-blue-500 active:text-blue-500/80"
-              onClick={() => setOpen(false)}
-            >
+          <div className="flex justify-between p-safe-max-4">
+            <Button variant="ios" size="auto" onClick={() => setOpen(false)}>
               {messages['cancel']}
-            </button>
+            </Button>
 
             {header}
           </div>

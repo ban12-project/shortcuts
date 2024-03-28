@@ -22,12 +22,14 @@ const buttonVariants = cva(
         ghost:
           'hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50',
         link: 'text-slate-900 underline-offset-4 hover:underline dark:text-slate-50',
+        ios: 'text-base font-normal text-blue-500 active:text-blue-500/80 disabled:text-zinc-300 dark:disabled:text-zinc-700',
       },
       size: {
         default: 'h-10 px-4 py-2',
         sm: 'h-9 rounded-md px-3',
         lg: 'h-11 rounded-md px-8',
         icon: 'h-10 w-10',
+        auto: '',
       },
     },
     defaultVariants: {

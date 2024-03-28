@@ -1,13 +1,13 @@
-import Link from 'next/link'
+import Link from '#/components/link'
 import { Messages } from '#/get-dictionary'
 
-import { Albums } from '#/app/[lang]/page'
+import { Album } from '#/app/[lang]/page'
 
-import ShortcutsGallery from './shortcut-gallery'
-import styles from './shortcut-gallery-list.module.css'
+import styles from './albums-list.module.css'
+import Albums from './albums'
 
 type ShortcutsGalleryListProps = {
-  albums: Albums[]
+  albums: Album[]
   messages: Messages
 }
 
@@ -54,7 +54,7 @@ export default async function ShortcutsGalleryList({
             </div>
             <p className="flex-1 text-gray-500/90">{item.title}</p>
           </div>
-          <ShortcutsGallery shortcuts={galleries[index]} />
+          <Albums shortcuts={galleries[index]} />
         </li>
       ))}
     </ul>

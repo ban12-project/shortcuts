@@ -1,13 +1,13 @@
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '#/components/link'
 
-import { Albums } from '#/app/[lang]/page'
+import { Album } from '#/app/[lang]/page'
 
-type AlbumsGalleryProps = {
-  albums: Albums[]
+type AlbumsCardListProps = {
+  albums: Album[]
 }
 
-export default function AlbumsGallery({ albums }: AlbumsGalleryProps) {
+export default function AlbumsCardList({ albums }: AlbumsCardListProps) {
   return (
     <section className="hidden-scrollbar -ml-3 flex snap-x snap-mandatory overflow-x-auto px-safe-max-4 lg:snap-none lg:px-5">
       {albums.map((item, index) => (
