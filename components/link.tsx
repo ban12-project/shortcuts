@@ -1,24 +1,24 @@
 'use client'
 
 import { forwardRef } from 'react'
-import _Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import NextLink from 'next/link'
 
-type Props = React.ComponentPropsWithRef<typeof _Link>
+import { useLocale } from '#/components/i18n'
 
-export function useLink(href: Props['href']) {
-  const pathName = usePathname()
-  const redirectedPathName = (href: Props['href']) => {
-    if (!pathName) return '/'
-    const segments = pathName.split('/').slice(0, 2)
-    return segments.join('/') + href
-  }
+type Props = React.ComponentPropsWithRef<typeof NextLink>
 
-  return redirectedPathName(href)
-}
+export default forwardRef<React.ElementRef<'a'>, Props>(function Link(
+  { href, ...rest },
+  forwardedRef,
+) {
+  const { locale } = useLocale()
+  const hrefWithLocale =
+    typeof href === 'string'
+      ? `/${locale}${href}`
+      : {
+          ...href,
+          pathname: `/${locale}${href.pathname}`,
+        }
 
-export const Link = forwardRef<React.ElementRef<'a'>, Props>(
-  function Link({ href, ...rest }, forwardedRef) {
-    return <_Link {...rest} ref={forwardedRef} href={useLink(href)} />
-  },
-)
+  return <NextLink {...rest} ref={forwardedRef} href={hrefWithLocale} />
+})

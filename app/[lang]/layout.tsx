@@ -5,6 +5,7 @@ import { Locale } from '#/i18n-config'
 
 import { cn } from '#/lib/utils'
 import CSSPaintPolyfill from '#/components/css-paint-polyfill'
+import { LocaleProvider } from '#/components/i18n'
 
 import { Providers } from './providers'
 
@@ -30,7 +31,12 @@ export const viewport = {
   viewportFit: 'cover',
 }
 
-export default function RootLayout({ params, children, detail, post }: RootLayoutProps) {
+export default function RootLayout({
+  params,
+  children,
+  detail,
+  post,
+}: RootLayoutProps) {
   return (
     <html lang={params.lang} suppressHydrationWarning>
       <body
@@ -40,9 +46,11 @@ export default function RootLayout({ params, children, detail, post }: RootLayou
         )}
       >
         <Providers>
-          {children}
-          {detail}
-          {post}
+          <LocaleProvider locale={params.lang}>
+            {children}
+            {detail}
+            {post}
+          </LocaleProvider>
         </Providers>
 
         {/* <CSSPaintPolyfill /> */}
