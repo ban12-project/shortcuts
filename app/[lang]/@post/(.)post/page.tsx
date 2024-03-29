@@ -8,3 +8,5 @@ export default async function PostPage(props: { params: { lang: Locale } }) {
 
   return <ShortcutPost messages={messages} drawer={true} />
 }
+
+export const runtime = 'edge'

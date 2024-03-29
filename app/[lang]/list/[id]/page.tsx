@@ -48,3 +48,5 @@ export async function generateMetadata({
     description: 'Get Stuff Done',
   }
 }
+
+export const runtime = 'edge'

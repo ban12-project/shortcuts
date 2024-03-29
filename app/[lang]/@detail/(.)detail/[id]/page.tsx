@@ -22,3 +22,5 @@ export default async function ShortcutPage({
     </PageDrawer>
   )
 }
+
+export const runtime = 'edge'

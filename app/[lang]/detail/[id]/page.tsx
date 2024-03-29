@@ -13,3 +13,5 @@ export default async function ShortcutPage({
     </main>
   )
 }
+
+export const runtime = 'edge'

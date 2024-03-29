@@ -32,3 +32,5 @@ export async function generateMetadata({
     description: '实用的小组件快捷指令',
   }
 }
+
+export const runtime = 'edge'

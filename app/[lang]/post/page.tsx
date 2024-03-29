@@ -12,3 +12,5 @@ export default async function PostPage({
 
   return <ShortcutPost messages={messages} />
 }
+
+export const runtime = 'edge'

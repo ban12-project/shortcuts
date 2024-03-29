@@ -60,3 +60,5 @@ export async function generateMetadata({
     description: messages.description,
   }
 }
+
+export const runtime = 'edge'
