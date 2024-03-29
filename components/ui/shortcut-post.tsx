@@ -136,6 +136,10 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
     const form = useFormContext<FormSchemaType>()
     const [state, dispatch] = useFormState(getShortcutByiCloud, initialState)
 
+    // there need client-side validation but
+    // like this handle server actions progressive enhancement will be disabled
+    // progressive enhancement: https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#behavior
+    // react-hook-form related issue: https://github.com/react-hook-form/react-hook-form/issues/10391
     const handleAction = async (formData: FormData) => {
       const isValid = await form.trigger()
       if (!isValid) return
@@ -158,7 +162,10 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
 
       if (state.data.recordType === 'GalleryShortcut') {
         form.setValue('description', state.data.fields.longDescription.value)
-        form.setValue('language', state.data.fields.language.value)
+        form.setValue(
+          'language',
+          state.data.fields.language.value.replace('_', '-'),
+        )
       }
     }, [form, state.data])
 
@@ -228,7 +235,7 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
                 <Input
                   variant="ios"
                   autoComplete="off"
-                  placeholder="New Shortcut"
+                  placeholder={messages['form-name']}
                   {...field}
                 />
               </FormControl>
@@ -244,7 +251,7 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
             <FormItem>
               <FormControl>
                 <Textarea
-                  placeholder="Tell us a little bit about this shortcut"
+                  placeholder={messages['form-description']}
                   className="resize-none"
                   variant="ios"
                   {...field}
@@ -305,16 +312,16 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a verified email to display" />
+                    <SelectValue placeholder="Select a language" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="zh_CN">zh_CN</SelectItem>
+                  <SelectItem value="zh-CN">zh-CN</SelectItem>
                   <SelectItem value="en">en</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription className="px-3">
-                You can manage email addresses in your
+                {messages['form-language']}({messages.common.optional})
               </FormDescription>
               <FormMessage className="px-3" />
             </FormItem>

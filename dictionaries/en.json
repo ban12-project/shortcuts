@@ -3,7 +3,8 @@
     "cancel": "Cancel",
     "search": "Search",
     "done": "Done",
-    "next": "Next"
+    "next": "Next",
+    "optional": "Optional"
   },
   "theme": {
     "light": "Light",
@@ -25,5 +26,8 @@
     "MENU_BAR_ON_MAC": "Pin in Menu Bar",
     "RECEIVES_SCREEN": "Receive What's On Screen",
     "QUICK_ACTIONS_ON_MAC": "Use as Quick Action"
-  }
+  },
+  "form-name": "New Shortcut",
+  "form-description": "Tell us a little bit about this shortcut",
+  "form-language": "Language used for shortcuts"
 }
