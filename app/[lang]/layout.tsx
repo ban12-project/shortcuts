@@ -2,12 +2,11 @@ import './globals.css'
 
 import { Inter } from 'next/font/google'
 import { Locale } from '#/i18n-config'
+import { ThemeProvider } from 'next-themes'
 
 import { cn } from '#/lib/utils'
 import CSSPaintPolyfill from '#/components/css-paint-polyfill'
 import { LocaleProvider } from '#/components/i18n'
-
-import { Providers } from './providers'
 
 type RootLayoutProps = {
   params: { lang: Locale }
@@ -45,13 +44,18 @@ export default function RootLayout({
           inter.variable,
         )}
       >
-        <Providers>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           <LocaleProvider locale={params.lang}>
             {children}
             {detail}
             {post}
           </LocaleProvider>
-        </Providers>
+        </ThemeProvider>
 
         {/* <CSSPaintPolyfill /> */}
       </body>
