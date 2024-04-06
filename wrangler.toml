@@ -16,8 +16,8 @@ compatibility_flags = ["nodejs_compat"]
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#d1-databases
 [[d1_databases]]
 binding = "DB" # i.e. available in your Worker on env.DB
-database_name = "dev-d1-shortcuts"
-database_id = "a5edd591-7c7e-4812-ad39-ab278eb22f5f"
+database_name = "shortcuts-db"
+database_id = "530cecb0-9196-4344-b6fc-e6e96f1c7426"
 
 # Bind a Durable Object. Durable objects are a scale-to-zero compute primitive based on the actor model.
 # Durable Objects can live for as long as needed. Use these when you need a long-running "server", such as in realtime apps.

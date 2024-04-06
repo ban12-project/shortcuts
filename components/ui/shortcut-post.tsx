@@ -11,12 +11,12 @@ import React, {
 } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Messages } from '#/get-dictionary'
-import { Loader, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useFormState, useFormStatus } from 'react-dom'
 import { useForm, useFormContext } from 'react-hook-form'
 import * as z from 'zod'
 
-import { getShortcutByiCloud } from '#/lib/actions'
+import { postShortcut } from '#/lib/actions'
 import { useLocale } from '#/components/i18n'
 
 import { Button } from './button'
@@ -58,20 +58,22 @@ const icloudSchema = z.object({
 })
 
 const shortcutSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
-  icon: z.string().optional(),
+  icon: z.string().nullable(),
   backgroundColor: z.string(),
-  details: z.array(
-    z.enum([
-      'SHARE_SHEET',
-      'APPLE_WATCH',
-      'MENU_BAR_ON_MAC',
-      'QUICK_ACTIONS_ON_MAC',
-      'RECEIVES_SCREEN',
-    ]),
-  ),
-  language: z.string(),
+  details: z
+    .array(
+      z.enum([
+        'SHARE_SHEET',
+        'APPLE_WATCH',
+        'MENU_BAR_ON_MAC',
+        'QUICK_ACTIONS_ON_MAC',
+        'RECEIVES_SCREEN',
+      ]),
+    )
+    .nullable(),
+  language: z.enum(['zh-CN', 'en']),
 })
 
 const formSchema = z.intersection(icloudSchema, shortcutSchema)
@@ -107,8 +109,6 @@ const FormStatusContext = createContext<FormStatusContextValue>(
   {} as FormStatusContextValue,
 )
 
-const initialState = { message: '', errors: {} }
-
 const SubmitButton = React.forwardRef<React.ElementRef<'button'>>(
   function SubmitButton(props, ref) {
     const status = useFormStatus()
@@ -131,43 +131,65 @@ const SubmitButton = React.forwardRef<React.ElementRef<'button'>>(
   },
 )
 
+const initialState = { message: '', errors: {} }
+
 const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
   function FormComponent({ messages }, ref) {
     const form = useFormContext<FormSchemaType>()
-    const [state, dispatch] = useFormState(getShortcutByiCloud, initialState)
+    const [state, dispatch] = useFormState(postShortcut, initialState)
+    const otherFieldsVisibility =
+      !!state.data && !form.formState.dirtyFields.icloud
 
     // there need client-side validation but
     // like this handle server actions progressive enhancement will be disabled
     // progressive enhancement: https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#behavior
     // react-hook-form related issue: https://github.com/react-hook-form/react-hook-form/issues/10391
     const handleAction = async (formData: FormData) => {
-      const isValid = await form.trigger()
+      // undefined means triggers validation on all fields.
+      const isValid = await form.trigger(
+        otherFieldsVisibility ? undefined : 'icloud',
+      )
       if (!isValid) return
+
+      if (otherFieldsVisibility) {
+        formData.append(
+          'backgroundColor',
+          state.data.fields.icon_color.value.toString(),
+        )
+
+        if (state.data.recordType === 'SharedShortcut') {
+          formData.append('icon', state.data.fields.icon.value.downloadURL)
+        }
+      }
+
       await dispatch(formData)
     }
 
     useEffect(() => {
+      if (state.message)
+        return form.setError('icloud', { message: state.message })
+
       if (!state.data) return
+
+      // for check isDirty
+      form.resetField('icloud', { defaultValue: form.getValues().icloud })
 
       // fill the form with data from icloud
       form.setValue('name', state.data.fields.name.value)
-      form.setValue(
-        'backgroundColor',
-        state.data.fields.icon_color.value.toString(),
-      )
-
-      if (state.data.recordType === 'SharedShortcut') {
-        form.setValue('icon', state.data.fields.icon.value.downloadURL)
-      }
 
       if (state.data.recordType === 'GalleryShortcut') {
         form.setValue('description', state.data.fields.longDescription.value)
         form.setValue(
           'language',
-          state.data.fields.language.value.replace('_', '-'),
+          state.data.fields.language.value.replace(
+            '_',
+            '-',
+          ) as FormSchemaType['language'],
         )
       }
-    }, [form, state.data])
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [state])
 
     const buttonRef = useRef<React.ElementRef<'button'> | null>(null)
 
@@ -226,41 +248,45 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  variant="ios"
-                  autoComplete="off"
-                  placeholder={messages['form-name']}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage className="px-3" />
-            </FormItem>
-          )}
-        />
+        {otherFieldsVisibility && (
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="animate-slideUpAndFade">
+                <FormControl>
+                  <Input
+                    variant="ios"
+                    autoComplete="off"
+                    placeholder={messages['form-name']}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="px-3" />
+              </FormItem>
+            )}
+          />
+        )}
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Textarea
-                  placeholder={messages['form-description']}
-                  className="resize-none"
-                  variant="ios"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage className="px-3" />
-            </FormItem>
-          )}
-        />
+        {otherFieldsVisibility && (
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="animate-slideUpAndFade">
+                <FormControl>
+                  <Textarea
+                    placeholder={messages['form-description']}
+                    className="resize-none"
+                    variant="ios"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="px-3" />
+              </FormItem>
+            )}
+          />
+        )}
 
         {/* {details.map((item) => (
           <FormField
@@ -304,29 +330,35 @@ const FormComponent = forwardRef<FormHandler, { messages: Messages }>(
           />
         ))} */}
 
-        <FormField
-          control={form.control}
-          name="language"
-          render={({ field }) => (
-            <FormItem>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a language" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="zh-CN">zh-CN</SelectItem>
-                  <SelectItem value="en">en</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription className="px-3">
-                {messages['form-language']}({messages.common.optional})
-              </FormDescription>
-              <FormMessage className="px-3" />
-            </FormItem>
-          )}
-        />
+        {otherFieldsVisibility && (
+          <FormField
+            control={form.control}
+            name="language"
+            render={({ field }) => (
+              <FormItem className="animate-slideUpAndFade">
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  name={field.name}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a language" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="zh-CN">zh-CN</SelectItem>
+                    <SelectItem value="en">en</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription className="px-3">
+                  {messages['form-language']}({messages.common.optional})
+                </FormDescription>
+                <FormMessage className="px-3" />
+              </FormItem>
+            )}
+          />
+        )}
 
         <SubmitButton ref={buttonRef} />
       </form>
@@ -361,17 +393,18 @@ export default function ShortcutPost({
   const [status, setStatus] = useState<FormStatus>({
     pending: false,
   } as FormStatus)
+
   return (
     <Form {...form}>
-      {drawer ? (
-        <FormStatusContext.Provider value={{ status, setStatus }}>
+      <FormStatusContext.Provider value={{ status, setStatus }}>
+        {drawer ? (
           <Drawer messages={messages.common} submit={submit}>
             <FormComponent messages={messages} ref={formRef} />
           </Drawer>
-        </FormStatusContext.Provider>
-      ) : (
-        <FormComponent messages={messages} />
-      )}
+        ) : (
+          <FormComponent messages={messages} />
+        )}
+      </FormStatusContext.Provider>
     </Form>
   )
 }
@@ -383,43 +416,24 @@ function NextButton({
   messages: Messages['common']
   submit: FormHandler['submit']
 }) {
-  const { trigger } = useFormContext<FormSchemaType>()
-  const [isLastStep, setIsLastStep] = useState(false)
   const {
-    status: { pending, data },
+    status: { pending },
   } = useContext(FormStatusContext)
-  const { formState, getValues } = useFormContext<FormSchemaType>()
 
-  useEffect(() => {
-    // check icloud field is dirty
-    // if server actions return value equals form icloud value then set isLastStep to true
-    if (
-      !formState.dirtyFields.icloud &&
-      data?.get('icloud') === getValues('icloud')
-    ) {
-      setIsLastStep(true)
-    } else {
-      setIsLastStep(false)
-    }
-  }, [data, formState.dirtyFields, getValues])
-
-  const onClick = async () => {
-    const isValid = await trigger('icloud', { shouldFocus: true })
-    if (!isValid) return
-
-    submit()
-  }
+  const {
+    formState: { dirtyFields },
+  } = useFormContext<FormSchemaType>()
 
   return (
     <Button
       variant="ios"
       size="auto"
       type="submit"
-      onClick={onClick}
+      onClick={submit}
       disabled={pending}
     >
       {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      {isLastStep ? messages.done : messages.next}
+      {!dirtyFields.icloud ? messages.done : messages.next}
     </Button>
   )
 }
@@ -436,14 +450,6 @@ function Drawer({
   children: React.ReactNode
 }) {
   const [snap, setSnap] = useState<number | string | null>(snapPoints[0])
-
-  const onNext = () => {
-    const lastPoint = snapPoints[snapPoints.length - 1]
-    if (snap === lastPoint) return false
-    const nextIndex = snapPoints.findIndex((_snap) => _snap === snap) + 1
-    setSnap(snapPoints[nextIndex])
-    return nextIndex === snapPoints.length - 1
-  }
 
   return (
     <PageDrawer
