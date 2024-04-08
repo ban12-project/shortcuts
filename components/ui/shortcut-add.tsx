@@ -38,7 +38,7 @@ export default async function ShortcutAdd({
 
         <ShortcutCard
           className="pointer-events-none inline-block h-32 w-44 text-left"
-          href={`https://www.icloud.com/shortcuts/${shortcut.id}`}
+          href={shortcut.icloud}
           item={shortcut}
         />
       </section>

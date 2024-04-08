@@ -12,6 +12,14 @@ export default forwardRef<React.ElementRef<'a'>, Props>(function Link(
   forwardedRef,
 ) {
   const { locale } = useLocale()
+
+  const isExternal =
+    typeof href === 'string'
+      ? href.startsWith('http')
+      : !!href.pathname?.startsWith('http')
+
+  if (isExternal) return <NextLink {...rest} ref={forwardedRef} href={href} />
+
   const hrefWithLocale =
     typeof href === 'string'
       ? `/${locale}${href}`
