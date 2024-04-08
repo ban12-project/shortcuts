@@ -21,6 +21,7 @@ export const getPrismaWithD1 = () => {
 
   // Initialize Prisma Client with the D1 adapter
   const adapter = new PrismaD1(getRequestContext().env.DB)
+  // @ts-ignore
   const prisma = globalForPrisma.prisma || new PrismaClient({ adapter })
 
   return prisma

@@ -7,7 +7,7 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window'
 import { useResponsive } from '#/hooks/use-responsive'
 
 import ShortcutCard from './shortcut-card'
-import { Shortcut } from './albums-list'
+import { Shortcut } from '@prisma/client'
 
 type AlbumsProps = {
   shortcuts: Shortcut[]

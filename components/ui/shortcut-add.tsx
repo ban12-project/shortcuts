@@ -1,3 +1,6 @@
+import { notFound } from 'next/navigation'
+import { getRequestContext } from '@cloudflare/next-on-pages'
+import { Shortcut } from '@prisma/client'
 import { Messages } from '#/get-dictionary'
 import { Locale } from '#/i18n-config'
 import { Plus, Share } from 'lucide-react'
@@ -10,35 +13,38 @@ export type ShortcutAddProps = {
   messages: Messages
 }
 
-export default function ShortcutAdd({ params, messages }: ShortcutAddProps) {
+export default async function ShortcutAdd({
+  params,
+  messages,
+}: ShortcutAddProps) {
+  const db = getRequestContext().env.DB
+  const shortcut = await db
+    .prepare(`SELECT * FROM Shortcut WHERE id = ?`)
+    .bind(params.id)
+    .first<Shortcut>()
+
+  if (!shortcut) notFound()
+
   return (
     <>
       <section className="flex-1 space-y-4 overflow-auto text-center p-safe-max-4">
-        <h3 className="text-3xl font-bold">将文本转为音频</h3>
-        <p className="text-lg text-zinc-500/90">
-          Make an audio file use text-to speech
-        </p>
-        <p className="text-lg text-zinc-500/90">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam
-          reprehenderit officia officiis facere, amet suscipit explicabo. Velit
-          sunt corrupti mollitia porro fugiat, illo est. Quae, quos? Ducimus
-          eveniet explicabo quidem.
-        </p>
-        <p className="text-lg text-zinc-500/90">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam
-          reprehenderit officia officiis facere, amet suscipit explicabo. Velit
-          sunt corrupti mollitia porro fugiat, illo est. Quae, quos? Ducimus
-          eveniet explicabo quidem.
-        </p>
+        <h3 className="text-3xl font-bold">{shortcut.name}</h3>
+
+        {shortcut.description?.split('\n').map((item, index) => (
+          <p key={index} className="text-lg text-zinc-500/90">
+            {item}
+          </p>
+        ))}
+
         <ShortcutCard
-          className="pointer-events-none inline-block h-32 w-44"
-          href={`https://www.icloud.com/shortcuts/${params.id}`}
-          item={{ id: 1, title: '批量添加提醒事项' }}
+          className="pointer-events-none inline-block h-32 w-44 text-left"
+          href={`https://www.icloud.com/shortcuts/${shortcut.id}`}
+          item={shortcut}
         />
       </section>
 
       <footer className="w-full pt-4 text-lg pb-safe-max-8 px-safe-max-6">
-        <p className="font-semibold text-zinc-500/90">{messages.about}</p>
+        {/* <p className="font-semibold text-zinc-500/90">{messages.about}</p>
 
         <ul className="mb-6 mt-3 space-y-3">
           <li className="flex items-center gap-2">
@@ -50,7 +56,7 @@ export default function ShortcutAdd({ params, messages }: ShortcutAddProps) {
           <li className="flex items-center gap-2">
             <Share /> 在共享表单中显示
           </li>
-        </ul>
+        </ul> */}
 
         <Button
           className="h-12 w-full rounded-lg py-3 text-base"

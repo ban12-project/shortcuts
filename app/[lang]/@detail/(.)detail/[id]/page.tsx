@@ -1,8 +1,9 @@
+import { Suspense } from 'react'
 import { getDictionary } from '#/get-dictionary'
-import { Share } from 'lucide-react'
+import { Loader, Share } from 'lucide-react'
 
-import ShortcutAdd, { ShortcutAddProps } from '#/components/ui/shortcut-add'
 import PageDrawer from '#/components/ui/page-drawer'
+import ShortcutAdd, { ShortcutAddProps } from '#/components/ui/shortcut-add'
 
 export default async function ShortcutPage({
   params,
@@ -18,7 +19,16 @@ export default async function ShortcutPage({
         </button>
       }
     >
-      <ShortcutAdd messages={messages} params={params} />
+      <Suspense
+        fallback={
+          <div className="flex h-1/2 w-full flex-col items-center justify-center gap-2 text-zinc-500/90">
+            <Loader className="h-6 w-6 animate-spin" />
+            <p>{messages.common.loading}</p>
+          </div>
+        }
+      >
+        <ShortcutAdd messages={messages} params={params} />
+      </Suspense>
     </PageDrawer>
   )
 }

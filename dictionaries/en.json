@@ -4,7 +4,8 @@
     "search": "Search",
     "done": "Done",
     "next": "Next",
-    "optional": "Optional"
+    "optional": "Optional",
+    "loading": "Loading"
   },
   "theme": {
     "light": "Light",

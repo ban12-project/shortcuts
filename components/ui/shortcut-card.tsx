@@ -1,10 +1,9 @@
 import { LinkProps } from 'next/link'
+import { Shortcut } from '@prisma/client'
 import { Layers2, Plus } from 'lucide-react'
 
 import { cn } from '#/lib/utils'
 import Link from '#/components/link'
-
-import { Shortcut } from './albums-list'
 
 interface ShortcutCardProps
   extends LinkProps,
@@ -26,7 +25,7 @@ export default function ShortcutCard({
       {...props}
     >
       <h3 className="absolute bottom-3 left-3 right-3 max-h-12 overflow-hidden text-lg font-semibold leading-6">
-        {item.title}
+        {item.name}
       </h3>
 
       <Layers2 className="absolute left-3 top-3 origin-top-left scale-125" />
