@@ -438,7 +438,7 @@ function NextButton({
   )
 }
 
-const snapPoints = [0.6, 1]
+const snapPoints = [0.7, 1]
 
 function Drawer({
   messages,

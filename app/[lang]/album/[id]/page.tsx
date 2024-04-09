@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getRequestContext } from '@cloudflare/next-on-pages'
-import { Album as IAlbum, Shortcut } from '@prisma/client'
+import { Album, Shortcut } from '@prisma/client'
 import { Locale } from '#/i18n-config'
 
 import ShortcutCard from '#/components/ui/shortcut-card'
@@ -35,7 +35,7 @@ export default async function ListPage({ params }: ListPageProps) {
   `,
     )
     .bind(params.id)
-    .first<IAlbum & { shortcuts: string }>()
+    .first<Album & { shortcuts: string }>()
 
   if (!album) notFound()
 
@@ -78,7 +78,7 @@ export async function generateMetadata({
   `,
     )
     .bind(params.id)
-    .first<IAlbum>()
+    .first<Album>()
 
   if (!album) notFound()
 

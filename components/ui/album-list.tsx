@@ -1,7 +1,6 @@
-import { getRequestContext } from '@cloudflare/next-on-pages'
-import { Album as IAlbum, Shortcut } from '@prisma/client'
 import { Messages } from '#/get-dictionary'
 
+import { fetchAlbums } from '#/lib/actions'
 import Link from '#/components/link'
 
 import Album from './album'
@@ -12,29 +11,7 @@ type AlbumListProps = {
 }
 
 export default async function AlbumList({ messages }: AlbumListProps) {
-  const db = getRequestContext().env.DB
-  const { results: albums } = await db
-    .prepare(
-      `
-    SELECT 
-      id,
-      title,
-      description,
-      (
-        SELECT 
-          json_group_array(json_object(
-            'id', s.id,
-            'name', s.name,
-            'description', s.description,
-            'icon', s.icon
-          ))
-        FROM Shortcut s
-        WHERE s.albumId = Album.id
-      ) AS shortcuts
-    FROM Album
-    `,
-    )
-    .all<IAlbum & { shortcuts: string }>()
+  const albums = await fetchAlbums()
 
   return (
     <ul className={styles.list}>

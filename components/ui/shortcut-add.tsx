@@ -1,10 +1,9 @@
 import { notFound } from 'next/navigation'
-import { getRequestContext } from '@cloudflare/next-on-pages'
-import { Shortcut } from '@prisma/client'
 import { Messages } from '#/get-dictionary'
 import { Locale } from '#/i18n-config'
 import { Plus, Share } from 'lucide-react'
 
+import { fetchShortcutByID } from '#/lib/actions'
 import { Button } from '#/components/ui/button'
 import ShortcutCard from '#/components/ui/shortcut-card'
 
@@ -17,11 +16,7 @@ export default async function ShortcutAdd({
   params,
   messages,
 }: ShortcutAddProps) {
-  const db = getRequestContext().env.DB
-  const shortcut = await db
-    .prepare(`SELECT * FROM Shortcut WHERE id = ?`)
-    .bind(params.id)
-    .first<Shortcut>()
+  const shortcut = await fetchShortcutByID(params.id)
 
   if (!shortcut) notFound()
 

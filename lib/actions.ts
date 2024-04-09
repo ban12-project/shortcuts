@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getRequestContext } from '@cloudflare/next-on-pages'
+import type { Album, Collection, Shortcut } from '@prisma/client'
 import { z } from 'zod'
 
 import { ShortcutRecord } from '#/app/api/icloud/[uuid]/shortcut'
@@ -176,4 +177,59 @@ export async function postShortcut(prevState: State, formData: FormData) {
 
   revalidatePath('/')
   redirect('/')
+}
+
+export async function fetchAlbums() {
+  const db = getRequestContext().env.DB
+  const { results: albums } = await db
+    .prepare(
+      `
+    SELECT 
+      id,
+      title,
+      description,
+      (
+        SELECT 
+          json_group_array(json_object(
+            'id', s.id,
+            'name', s.name,
+            'description', s.description,
+            'icon', s.icon
+          ))
+        FROM Shortcut s
+        WHERE s.albumId = Album.id
+      ) AS shortcuts
+    FROM Album
+    `,
+    )
+    .all<Album & { shortcuts: string }>()
+
+  return albums
+}
+
+export async function fetchCollections() {
+  const db = getRequestContext().env.DB
+  const { results: collections } = await db
+    .prepare(
+      `
+    SELECT
+      id,
+      title,
+      image
+    FROM Collection
+  `,
+    )
+    .all<Collection>()
+
+  return collections
+}
+
+export async function fetchShortcutByID(id: string) {
+  const db = getRequestContext().env.DB
+  const shortcut = await db
+    .prepare(`SELECT * FROM Shortcut WHERE id = ?`)
+    .bind(id)
+    .first<Shortcut>()
+
+  return shortcut
 }
