@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getRequestContext } from '@cloudflare/next-on-pages'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Album, Collection, Shortcut } from '@prisma/client'
 import { z } from 'zod'
 
@@ -150,11 +151,36 @@ export async function postShortcut(prevState: State, formData: FormData) {
   }
 
   const db = getRequestContext().env.DB
+
+  let albumId: number = NaN
+  try {
+    if (!process.env.GOOGLE_GEMINI_KEY || !process.env.GOOGLE_GEMINI_MODEL)
+      throw new Error('Google Gemini API key or model not set')
+
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_KEY)
+    const model = genAI.getGenerativeModel({
+      model: process.env.GOOGLE_GEMINI_MODEL,
+    })
+    const { results: albums } = await db
+      .prepare(`SELECT * FROM Album`)
+      .all<Album>()
+    const prompt = `Which of the following options describes "${name}, ${description}" Answer with numbers:
+        Options:
+        ${albums
+          .map((item) => `${item.id}: ${item.title} ${item.description}`)
+          .join('\n')}
+        The answer is:
+      `
+    const result = await model.generateContent(prompt)
+    const text = result.response.text()
+    albumId = Number.parseInt(text)
+  } catch (e) {}
+
   const result = await db
     .prepare(
       `
       INSERT INTO Shortcut (updatedAt, uuid, icloud, name, description, icon, backgroundColor, details, language, collectionId, albumId) 
-      VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)
+      VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
     `,
     )
     .bind(
@@ -166,6 +192,7 @@ export async function postShortcut(prevState: State, formData: FormData) {
       backgroundColor,
       details,
       language,
+      albumId || null,
     )
     .run()
 
