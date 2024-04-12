@@ -1,13 +1,13 @@
 'use client'
 
 import { forwardRef, useEffect, useMemo, useRef } from 'react'
-import { useSize } from 'ahooks'
+import { Shortcut } from '@prisma/client'
+import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList, ListChildComponentProps } from 'react-window'
 
 import { useResponsive } from '#/hooks/use-responsive'
 
 import ShortcutCard from './shortcut-card'
-import { Shortcut } from '@prisma/client'
 
 type AlbumsProps = {
   shortcuts: Shortcut[]
@@ -15,12 +15,17 @@ type AlbumsProps = {
 
 let PADDING_LEFT: number,
   PADDING_RIGHT: number,
-  ITEM_COUNT: number,
   GAP_SIZE = 12
 
 const outerElementType = forwardRef<React.ElementRef<'div'>>(
   function Outer(props, ref) {
-    return <div ref={ref} {...props} className="hidden-scrollbar"></div>
+    return (
+      <div
+        ref={ref}
+        {...props}
+        className="hidden-scrollbar overscroll-x-contain"
+      ></div>
+    )
   },
 )
 
@@ -50,23 +55,24 @@ const Column: React.ComponentType<ListChildComponentProps<Shortcut[]>> = ({
   style,
   data,
 }) => (
-  <ShortcutCard
+  <div
+    className="pb-5"
     style={{
       ...style,
       left: `${Number.parseFloat(style.left as string) + PADDING_LEFT}px`,
       width: `${Number.parseFloat(style.width as string) - GAP_SIZE}px`,
     }}
-    item={data[index]}
-    href={`/detail/${data[index].id}`}
-    scroll={false}
-  />
+  >
+    <ShortcutCard
+      className="block h-full [box-shadow:2px_4px_12px_#00000014] hover:[box-shadow:2px_4px_16px_#00000029] hover:[transform:scale3d(1.01,1.01,1.01)]"
+      item={data[index]}
+      href={`/detail/${data[index].id}`}
+      scroll={false}
+    />
+  </div>
 )
 
 export default function Albums({ shortcuts }: AlbumsProps) {
-  const ref = useRef<React.ElementRef<'div'>>(null)
-  const size = useSize(ref)
-
-  ITEM_COUNT = shortcuts.length
   const anchorRef = useRef<React.ElementRef<'div'>>(null)
   const update = () => {
     if (!anchorRef.current) return
@@ -89,26 +95,28 @@ export default function Albums({ shortcuts }: AlbumsProps) {
   const breakpoints = useResponsive()
 
   const columnNumber = useMemo(() => {
-    if (breakpoints['2xl']) return 10
-    if (breakpoints.xl) return 8
+    if (breakpoints['2xl']) return 8
     if (breakpoints.lg) return 6
     if (breakpoints.md) return 4
     return 2
   }, [breakpoints])
 
   return (
-    <>
-      <div className="absolute px-safe-max-4 lg:px-5" ref={anchorRef}></div>
-      <div className="h-32" ref={ref}>
-        {size && (
+    <div className="h-[148px]">
+      <div
+        className="absolute px-safe-max-4 lg:px-[var(--container-inset)]"
+        ref={anchorRef}
+      ></div>
+      <AutoSizer defaultWidth={1440}>
+        {({ height, width }) => (
           <FixedSizeList
             itemSize={
-              (size.width - PADDING_LEFT - PADDING_RIGHT) / columnNumber +
+              (width - PADDING_LEFT - PADDING_RIGHT) / columnNumber +
               GAP_SIZE / columnNumber
             }
-            width={size.width}
-            height={size.height}
-            itemCount={ITEM_COUNT}
+            width={width}
+            height={height}
+            itemCount={shortcuts.length}
             itemData={shortcuts}
             outerElementType={outerElementType}
             innerElementType={innerElementType}
@@ -117,18 +125,7 @@ export default function Albums({ shortcuts }: AlbumsProps) {
             {Column}
           </FixedSizeList>
         )}
-      </div>
-    </>
+      </AutoSizer>
+    </div>
   )
-  /* <section className="hidden-scrollbar flex h-32 w-full snap-x snap-mandatory gap-3 overflow-x-auto px-safe-max-4 md:snap-none">
-    {shortcuts.map((item) => (
-      <ShortcutCard
-        key={item.id}
-        item={item}
-        className="w-[calc((100%-0.75rem)/2)] snap-start scroll-ms-safe-max-4"
-        href={`/detail/${item.id}`}
-        scroll={false}
-      />
-    ))}
-  </section> */
 }

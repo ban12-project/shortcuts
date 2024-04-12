@@ -53,10 +53,12 @@ export default async function Collections({ params }: CollectionsProps) {
   if (!collection) notFound()
 
   return (
-    <main className="space-y-4">
-      <h2 className="overflow-hidden text-ellipsis whitespace-nowrap text-3xl font-bold pt-safe-max-4 px-safe-max-4">
-        {collection.title}
-      </h2>
+    <main>
+      <div className="container-full pb-5 pt-safe-max-4">
+        <h1 className="overflow-hidden text-ellipsis whitespace-nowrap text-3xl font-bold">
+          {collection.title}
+        </h1>
+      </div>
       <AlbumList messages={messages} />
     </main>
   )

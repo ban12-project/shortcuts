@@ -1,3 +1,4 @@
+import React from 'react'
 import { LinkProps } from 'next/link'
 import { Shortcut } from '@prisma/client'
 import { Layers2, Plus } from 'lucide-react'
@@ -19,9 +20,17 @@ export default function ShortcutCard({
   return (
     <Link
       className={cn(
-        'relative flex-none overflow-hidden rounded-3xl bg-gradient-to-br from-red-400 to-red-500 text-zinc-100 transition-[filter] active:brightness-75',
+        'relative flex-none overflow-hidden rounded-3xl bg-[var(--background-color)] text-zinc-100 transition-all active:brightness-75',
         className,
       )}
+      style={
+        {
+          '--background-color': item.backgroundColor
+            ? `#${Number.parseInt(item.backgroundColor).toString(16).replace(/ff$/gi, '')}`
+            : '',
+        } as React.CSSProperties
+      }
+      data-bg-raw={item.backgroundColor}
       {...props}
     >
       <h3 className="absolute bottom-3 left-3 right-3 max-h-12 overflow-hidden text-lg font-semibold leading-6">

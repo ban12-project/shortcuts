@@ -17,6 +17,7 @@ import { useForm, useFormContext } from 'react-hook-form'
 import * as z from 'zod'
 
 import { postShortcut } from '#/lib/actions'
+import { useResponsive } from '#/hooks/use-responsive'
 import { useLocale } from '#/components/i18n'
 
 import { Button } from './button'
@@ -450,8 +451,17 @@ function Drawer({
   children: React.ReactNode
 }) {
   const [snap, setSnap] = useState<number | string | null>(snapPoints[0])
+  const breakpoints = useResponsive()
 
-  return (
+  return breakpoints.lg ? (
+    <PageDrawer
+      messages={messages}
+      className="flex h-full flex-col"
+      header={<NextButton messages={messages} submit={submit} />}
+    >
+      {children}
+    </PageDrawer>
+  ) : (
     <PageDrawer
       snapPoints={snapPoints}
       fadeFromIndex={0}

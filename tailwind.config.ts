@@ -99,11 +99,58 @@ const config: Config = {
   plugins: [
     require('tailwindcss-animate'),
     require('@ban12/tailwindcss-safe-area'),
-    plugin(({ matchUtilities }) => {
+    plugin(({ matchUtilities, addBase, addComponents }) => {
       matchUtilities({
         perspective: (value) => ({
           perspective: value,
         }),
+      })
+
+      addBase({
+        ':root': {
+          '&:not([dir=rtl])': {
+            '--safe-area-inset-start': 'env(safe-area-inset-left)',
+            '--safe-area-inset-end': 'env(safe-area-inset-right)',
+          },
+          '&[dir=rtl]': {
+            '--safe-area-inset-start': 'env(safe-area-inset-right)',
+            '--safe-area-inset-end': 'env(safe-area-inset-left)',
+          },
+
+          '--container-inset-start': 'var(--safe-area-inset-start)',
+          '--container-inset-end': 'var(--safe-area-inset-end)',
+          // 16 -> 1rem default use by padding inline
+          // lg 1024 * a - b = 16
+          // 2xl 1536 * a - b = 140
+          // a=?
+          // b=?
+          '@media screen(lg)': {
+            '--container-inset': 'calc(24.21875vw - 232px)',
+            '--container-inset-start': 'calc(24.21875vw - 232px)',
+            '--container-inset-end': 'calc(24.21875vw - 232px)',
+          },
+          '@media screen(2xl)': {
+            '--container-inset': '140px',
+            '--container-inset-start': '140px',
+            '--container-inset-end': '140px',
+          },
+        },
+      })
+
+      addComponents({
+        '.hidden-scrollbar': {
+          'scrollbar-width': 'none' /* Firefox */,
+          ['&::-webkit-scrollbar']: {
+            display: 'none' /* Safari and Chrome */,
+          },
+        },
+        '.mask-image-paint-smooth-corners': {
+          'mask-image': 'paint(smooth-corners)',
+        },
+        '.container-full': {
+          'padding-inline':
+            'max(1rem, var(--container-inset-start)) max(1rem, var(--container-inset-end))',
+        },
       })
     }),
   ],

@@ -221,7 +221,8 @@ export async function fetchAlbums() {
             'id', s.id,
             'name', s.name,
             'description', s.description,
-            'icon', s.icon
+            'icon', s.icon,
+            'backgroundColor', s.backgroundColor
           ))
         FROM Shortcut s
         WHERE s.albumId = Album.id
