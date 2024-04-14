@@ -2,9 +2,8 @@ import { Skeleton } from './skeleton'
 
 export default function collectionsSkeleton() {
   return (
-    <div className="px-safe-max-4">
-      <Skeleton className="h-8 w-2/3" />
-      <Skeleton className="mt-3 aspect-[2.28] rounded-2xl" />
+    <div className="container-full pb-10 pt-2.5 lg:pb-20">
+      <Skeleton className="aspect-[4/5] rounded-2xl md:w-full md:h-[500px]" />
     </div>
   )
 }

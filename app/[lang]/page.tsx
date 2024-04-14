@@ -21,12 +21,14 @@ export default async function Home({ params }: HomePageProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-10 overflow-hidden bg-white/80 bg-opacity-80 py-4 saturate-[180%] backdrop-blur-[20px] backdrop-filter pt-safe-max-4 px-safe-max-4 dark:bg-black/80 dark:bg-opacity-80">
+      <header className="sticky top-0 z-10 overflow-hidden bg-white/80 bg-opacity-80 py-3 saturate-[180%] backdrop-blur-[20px] backdrop-filter pt-safe-max-3 px-safe-max-4 dark:bg-black/80 dark:bg-opacity-80">
         <SearchBar messages={messages.common} className="ml-auto md:max-w-sm" />
       </header>
-      <main className="pb-6 pt-2">
-        <div className="hidden pb-14 pt-20 mx-safe-max-4 lg:mx-[var(--container-inset)] lg:flex lg:text-3xl lg:tracking-wide">
-          <h1 className="text-5xl font-bold">{messages.title}</h1>
+      <main className="pb-6">
+        <div className="flex pb-6 pt-14 mx-safe-max-4 lg:mx-[var(--container-inset,0)] lg:pb-14 lg:pt-20 lg:text-3xl lg:tracking-wide">
+          <h1 className="text-3xl text-[32px] font-bold lg:text-5xl">
+            {messages.title}
+          </h1>
         </div>
         <Suspense fallback={<CollectionsSkeleton />}>
           <Collections />

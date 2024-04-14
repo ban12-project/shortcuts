@@ -104,7 +104,7 @@ export default function Albums({ shortcuts }: AlbumsProps) {
   return (
     <div className="h-[148px]">
       <div
-        className="absolute px-safe-max-4 lg:px-[var(--container-inset)]"
+        className="absolute px-safe-max-4 lg:px-[var(--container-inset,0)]"
         ref={anchorRef}
       ></div>
       <AutoSizer defaultWidth={1440}>
