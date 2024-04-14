@@ -11,7 +11,7 @@ import { LocaleProvider } from '#/components/i18n'
 type RootLayoutProps = {
   params: { lang: Locale }
   children: React.ReactNode
-  detail: React.ReactNode
+  shortcut: React.ReactNode
   post: React.ReactNode
 }
 
@@ -33,7 +33,7 @@ export const viewport = {
 export default function RootLayout({
   params,
   children,
-  detail,
+  shortcut,
   post,
 }: RootLayoutProps) {
   return (
@@ -52,12 +52,22 @@ export default function RootLayout({
         >
           <LocaleProvider locale={params.lang}>
             {children}
-            {detail}
+            {shortcut}
             {post}
           </LocaleProvider>
         </ThemeProvider>
 
         {/* <CSSPaintPolyfill /> */}
+
+        {/* <!-- Cloudflare Web Analytics --> */}
+        {process.env.NODE_ENV === 'production' && (
+          <script
+            defer
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon='{"token": "13220e15fc4f4e2d8f78c137e3fd7b22"}'
+          ></script>
+        )}
+        {/* <!-- End Cloudflare Web Analytics --> */}
       </body>
     </html>
   )

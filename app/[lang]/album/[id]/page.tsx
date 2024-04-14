@@ -48,7 +48,7 @@ export default async function ListPage({ params }: ListPageProps) {
             <ShortcutCard
               /* style={{ '-tw-gradient-from': item.bgColorFrom, '--tw-gradient-to': item.bgColorTo } as React.CSSProperties} */
               className="w-[calc((100%-0.75rem)/2)] snap-start scroll-ms-safe-max-4"
-              href={`/detail/${item.id}`}
+              href={`/shortcut/${item.id}`}
               item={item}
               scroll={false}
             />
