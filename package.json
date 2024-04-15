@@ -24,7 +24,7 @@
     "@ban12/tailwindcss-safe-area": "^0.2.3",
     "@cloudflare/next-on-pages": "^1.11.0",
     "@formatjs/intl-localematcher": "^0.5.4",
-    "@google/generative-ai": "^0.6.0",
+    "@google/generative-ai": "^0.7.0",
     "@hookform/resolvers": "^3.3.4",
     "@prisma/adapter-d1": "5.12.1",
     "@prisma/client": "5.12.1",
