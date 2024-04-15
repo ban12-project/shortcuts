@@ -66,8 +66,6 @@ const Column: React.ComponentType<ListChildComponentProps<Shortcut[]>> = ({
     <ShortcutCard
       className="block h-full [box-shadow:2px_4px_12px_#00000014] hover:[box-shadow:2px_4px_16px_#00000029] hover:[transform:scale3d(1.01,1.01,1.01)]"
       item={data[index]}
-      href={`/shortcut/${data[index].id}`}
-      scroll={false}
     />
   </div>
 )

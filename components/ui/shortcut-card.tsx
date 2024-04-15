@@ -7,7 +7,7 @@ import { cn } from '#/lib/utils'
 import Link from '#/components/link'
 
 interface ShortcutCardProps
-  extends LinkProps,
+  extends Partial<LinkProps>,
     Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps> {
   item: Shortcut
 }
@@ -20,7 +20,7 @@ export default function ShortcutCard({
   return (
     <Link
       className={cn(
-        'relative flex-none overflow-hidden rounded-3xl bg-[var(--background-color)] text-zinc-100 transition-all active:brightness-75',
+        'relative flex-none overflow-hidden rounded-3xl bg-[var(--background-color,#ef4444)] text-zinc-100 transition-all active:brightness-75',
         className,
       )}
       style={
@@ -31,6 +31,8 @@ export default function ShortcutCard({
         } as React.CSSProperties
       }
       data-bg-raw={item.backgroundColor}
+      href={`/shortcut/${item.id}`}
+      scroll={false}
       {...props}
     >
       <h3 className="absolute bottom-3 left-3 right-3 max-h-12 overflow-hidden text-lg font-semibold leading-6">
