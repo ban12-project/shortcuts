@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { Messages } from '#/get-dictionary'
-import { useInViewport } from 'ahooks'
+import { useClickAway, useInViewport } from 'ahooks'
 
 import { cn } from '#/lib/utils'
 import SearchBar from '#/components/ui/search-bar'
@@ -19,6 +19,15 @@ export function Header({ messages }: HeaderProps) {
   const [, ratio] = useInViewport(sentinelRef, {
     threshold: 1,
   })
+
+  useClickAway(
+    () => {
+      if (!sticky) return
+      ;(document.activeElement as HTMLElement).blur()
+    },
+    ref,
+    'touchstart',
+  )
 
   return (
     <>
