@@ -1,4 +1,5 @@
 import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev'
+import bundleAnalyzer from '@next/bundle-analyzer'
 import { withSentryConfig } from '@sentry/nextjs'
 
 // Here we use the @cloudflare/next-on-pages next-dev module to allow us to use bindings during local development
@@ -21,7 +22,9 @@ const nextConfig = {
 }
 
 export default withSentryConfig(
-  nextConfig,
+  bundleAnalyzer({
+    enabled: process.env.ANALYZE === 'true',
+  })(nextConfig),
   {
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options
