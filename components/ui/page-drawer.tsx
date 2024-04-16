@@ -17,6 +17,8 @@ type PageDrawerProps = React.ComponentProps<typeof Drawer.Root> &
     messages: Messages['common']
   }
 
+export const PAGE_DRAWER_HEADER_ID = 'PAGE_DRAWER_HEADER_ID'
+
 export default function PageDrawer({
   className,
   header,
@@ -53,7 +55,10 @@ export default function PageDrawer({
             className,
           )}
         >
-          <div className="flex justify-between p-safe-max-4">
+          <div
+            className="flex justify-between p-safe-max-4"
+            id={PAGE_DRAWER_HEADER_ID}
+          >
             <Button variant="ios" size="auto" onClick={() => setOpen(false)}>
               {messages['cancel']}
             </Button>
