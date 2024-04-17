@@ -40,7 +40,7 @@ export default function SearchBar({
     searchParams.get('query')?.toString() || '',
   )
   const childrenSegment = useSelectedLayoutSegment('children')
-  const isSearch = childrenSegment === 'search'
+  const isOnSearch = childrenSegment === 'search'
 
   const { run } = useDebounceFn(
     () => {
@@ -50,7 +50,7 @@ export default function SearchBar({
       } else {
         return safeBack()
       }
-      if (!isSearch) {
+      if (!isOnSearch) {
         push(`/${locale}/search?${params.toString()}`)
       } else {
         replace(`/${locale}/search?${params.toString()}`)
@@ -81,7 +81,7 @@ export default function SearchBar({
   }
 
   const safeBack = () => {
-    if (!isSearch) return
+    if (!isOnSearch) return
 
     if (window.history.length > 1) {
       back()
