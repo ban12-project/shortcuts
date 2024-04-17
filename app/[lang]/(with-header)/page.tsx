@@ -9,7 +9,6 @@ import AlbumListSkeleton from '#/components/ui/album-list-skeleton'
 import Collections from '#/components/ui/collections'
 import CollectionsSkeleton from '#/components/ui/collections-skeleton'
 import ColorSchemeToggle from '#/components/ui/color-scheme-toggle'
-import { Header } from '#/components/ui/header'
 import Link from '#/components/link'
 
 type HomePageProps = {
@@ -21,7 +20,6 @@ export default async function Home({ params }: HomePageProps) {
 
   return (
     <>
-      <Header messages={messages} />
       <main className="pb-6">
         <div className="flex pb-6 pt-8 mx-safe-max-4 lg:mx-[var(--container-inset,0)] lg:pb-14 lg:pt-20 lg:text-3xl lg:tracking-wide">
           <h1 className="text-3xl text-[32px] font-bold lg:text-5xl">
