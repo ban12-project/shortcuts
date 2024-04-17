@@ -4,7 +4,7 @@ import { getRequestContext } from '@cloudflare/next-on-pages'
 import { Album, Shortcut } from '@prisma/client'
 import { Locale } from '#/i18n-config'
 
-import ShortcutCard from '#/components/ui/shortcut-card'
+import ShortcutList from '#/components/ui/shortcut-list'
 
 type ListPageProps = {
   params: { id: string; lang: Locale }
@@ -42,16 +42,7 @@ export default async function ListPage({ params }: ListPageProps) {
   return (
     <main className="container-full pt-safe-max-4">
       <h2 className="text-3xl font-bold">{album.title}</h2>
-      <ul className="grid grid-cols-1 gap-3 pt-4 md:grid-cols-2 md:gap-4 lg:grid-cols-3 2xl:grid-cols-4">
-        {(JSON.parse(album.shortcuts) as Shortcut[]).map((item) => (
-          <li key={item.id} className="flex h-32">
-            <ShortcutCard className="w-[calc((100%-0.75rem)/2)]" item={item} />
-            <p className="ml-3 h-full overflow-hidden text-ellipsis leading-[25.6px] text-zinc-500/90">
-              {item.description}
-            </p>
-          </li>
-        ))}
-      </ul>
+      <ShortcutList shortcuts={JSON.parse(album.shortcuts) as Shortcut[]} />
     </main>
   )
 }

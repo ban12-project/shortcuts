@@ -261,3 +261,39 @@ export async function fetchShortcutByID(id: string) {
 
   return shortcut
 }
+
+const searchSchema = z.object({
+  query: z.string().min(1).max(64),
+})
+
+export async function searchShortcuts(query: string) {
+  const validatedFields = searchSchema.safeParse({
+    query,
+  })
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Failed to validate form data.',
+    }
+  }
+
+  const db = getRequestContext().env.DB
+  const { results: shortcuts } = await db
+    .prepare(
+      `
+    SELECT 
+      id,
+      name,
+      description,
+      icon,
+      backgroundColor
+    FROM Shortcut
+    WHERE name LIKE ? OR description LIKE ?
+    `,
+    )
+    .bind(`%${query}%`, `%${query}%`)
+    .all<Shortcut>()
+
+  return shortcuts
+}
