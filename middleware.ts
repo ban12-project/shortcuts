@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import type { NextMiddleware, NextRequest } from 'next/server'
 import { match as matchLocale } from '@formatjs/intl-localematcher'
 import Negotiator from 'negotiator'
 
+import { auth } from './auth'
 import { i18n } from './i18n-config'
 
 function getLocale(request: NextRequest): string | undefined {
@@ -22,7 +23,8 @@ function getLocale(request: NextRequest): string | undefined {
   return locale
 }
 
-export function middleware(request: NextRequest) {
+export function middleware(...args: Parameters<NextMiddleware>) {
+  const [request] = args
   const { pathname, search } = request.nextUrl
 
   // // `/_next/` and `/api/` are ignored by the watcher, but we need to ignore files in `public` manually.
@@ -55,6 +57,9 @@ export function middleware(request: NextRequest) {
       ),
     )
   }
+
+  // @ts-ignore
+  return auth(...args)
 }
 
 export const config = {

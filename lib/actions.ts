@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation'
 import { getRequestContext } from '@cloudflare/next-on-pages'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Album, Collection, Shortcut } from '@prisma/client'
+import { signIn } from '#/auth'
+import { AuthError } from 'next-auth'
 import { z } from 'zod'
 
 import { ShortcutRecord } from '#/app/api/icloud/[uuid]/shortcut'
@@ -296,4 +298,23 @@ export async function searchShortcuts(query: string) {
     .all<Shortcut>()
 
   return shortcuts
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData)
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.'
+        default:
+          return 'Something went wrong.'
+      }
+    }
+    throw error
+  }
 }

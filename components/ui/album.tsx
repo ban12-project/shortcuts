@@ -1,7 +1,7 @@
 'use client'
 
 import { forwardRef, useEffect, useMemo, useRef } from 'react'
-import { Shortcut } from '@prisma/client'
+import type { Shortcut } from '@prisma/client'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList, ListChildComponentProps } from 'react-window'
 

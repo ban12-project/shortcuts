@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getRequestContext } from '@cloudflare/next-on-pages'
-import { Shortcut } from '@prisma/client'
+import type { Shortcut } from '@prisma/client'
 import { getDictionary } from '#/get-dictionary'
 
 import ShortcutAdd, { ShortcutAddProps } from '#/components/ui/shortcut-add'
