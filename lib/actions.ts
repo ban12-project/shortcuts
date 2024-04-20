@@ -318,3 +318,92 @@ export async function authenticate(
     throw error
   }
 }
+
+const updateSchema = z.intersection(
+  formSchema,
+  z.object({
+    id: z.string(),
+    uuid: z.string(),
+    albumId: z.string().nullable(),
+    collectionId: z.string().nullable(),
+  }),
+)
+
+export async function updateShortcut(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  const validatedFields = updateSchema.safeParse({
+    id: formData.get('id'),
+    uuid: formData.get('uuid'),
+    albumId: formData.get('albumId'),
+    collectionId: formData.get('collectionId'),
+    icloud: formData.get('icloud'),
+    name: formData.get('name'),
+    description: formData.get('description'),
+    icon: formData.get('icon'),
+    backgroundColor: formData.get('backgroundColor'),
+    details: [],
+    language: formData.get('language'),
+  })
+
+  if (!validatedFields.success) {
+    return 'Failed to validate form data'
+  }
+
+  const {
+    id,
+    uuid,
+    albumId,
+    collectionId,
+    icloud,
+    name,
+    description,
+    icon,
+    backgroundColor,
+    details,
+    language,
+  } = validatedFields.data
+
+  const db = getRequestContext().env.DB
+  const result = await db
+    .prepare(
+      `
+      UPDATE Shortcut
+      SET
+        updatedAt = CURRENT_TIMESTAMP,
+        uuid = ?,
+        icloud = ?,
+        name = ?,
+        description = ?,
+        icon = ?,
+        backgroundColor = ?,
+        details = ?,
+        language = ?,
+        collectionId = ?,
+        albumId = ?
+      WHERE id = ?
+    `,
+    )
+    .bind(
+      uuid,
+      icloud,
+      name,
+      description,
+      icon,
+      backgroundColor,
+      details,
+      language,
+      collectionId || null,
+      albumId || null,
+      id,
+    )
+    .run()
+
+  if (!result.success) {
+    return 'Failed to insert data.'
+  }
+
+  revalidatePath('/admin')
+  redirect('/admin')
+}
