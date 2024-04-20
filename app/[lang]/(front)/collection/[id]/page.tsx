@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getRequestContext } from '@cloudflare/next-on-pages'
-import { Collection } from '@prisma/client'
+import type { Collection } from '@prisma/client'
 import { getDictionary } from '#/get-dictionary'
 import { Locale } from '#/i18n-config'
 

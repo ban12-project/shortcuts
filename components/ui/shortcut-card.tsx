@@ -1,6 +1,6 @@
 import React from 'react'
 import { LinkProps } from 'next/link'
-import { Shortcut } from '@prisma/client'
+import type { Shortcut } from '@prisma/client'
 import { Layers2, Plus } from 'lucide-react'
 
 import { cn } from '#/lib/utils'
@@ -31,7 +31,7 @@ export default function ShortcutCard({
         } as React.CSSProperties
       }
       data-bg-raw={item.backgroundColor}
-      href={`/shortcut/${item.id}`}
+      href={`/get/${item.id}`}
       scroll={false}
       {...props}
     >

@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getRequestContext } from '@cloudflare/next-on-pages'
-import { Album, Shortcut } from '@prisma/client'
+import type { Album, Shortcut } from '@prisma/client'
 import { Locale } from '#/i18n-config'
 
 import ShortcutList from '#/components/ui/shortcut-list'

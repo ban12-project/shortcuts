@@ -1,4 +1,4 @@
-import { Shortcut } from '@prisma/client'
+import type { Shortcut } from '@prisma/client'
 
 import ShortcutCard from './shortcut-card'
 
