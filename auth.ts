@@ -3,7 +3,6 @@ import type { users } from '@prisma/client'
 import NextAuth, { type NextAuthConfig } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { pathToRegexp } from 'path-to-regexp'
-// import Passkey from 'next-auth/providers/passkey'
 import { z } from 'zod'
 
 import { i18n } from './i18n-config'

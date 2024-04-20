@@ -60,11 +60,11 @@ export default function RootLayout({
         {/* <CSSPaintPolyfill /> */}
 
         {/* <!-- Cloudflare Web Analytics --> */}
-        {process.env.NODE_ENV === 'production' && (
+        {process.env.NEXT_PUBLIC_CF_BEACON && (
           <script
             defer
             src="https://static.cloudflareinsights.com/beacon.min.js"
-            data-cf-beacon='{"token": "13220e15fc4f4e2d8f78c137e3fd7b22"}'
+            data-cf-beacon={`"token": "${process.env.NEXT_PUBLIC_CF_BEACON}"`}
           ></script>
         )}
         {/* <!-- End Cloudflare Web Analytics --> */}
