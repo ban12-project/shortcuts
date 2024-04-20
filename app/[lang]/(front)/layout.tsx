@@ -11,7 +11,7 @@ import { LocaleProvider } from '#/components/i18n'
 type RootLayoutProps = {
   params: { lang: Locale }
   children: React.ReactNode
-  shortcut: React.ReactNode
+  get: React.ReactNode
   post: React.ReactNode
 }
 
@@ -33,7 +33,7 @@ export const viewport = {
 export default function RootLayout({
   params,
   children,
-  shortcut,
+  get,
   post,
 }: RootLayoutProps) {
   return (
@@ -52,7 +52,7 @@ export default function RootLayout({
         >
           <LocaleProvider locale={params.lang}>
             {children}
-            {shortcut}
+            {get}
             {post}
           </LocaleProvider>
         </ThemeProvider>
