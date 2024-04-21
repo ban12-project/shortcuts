@@ -19,8 +19,8 @@ export default async function Collections({}: CollectionsProps) {
             className="relative block overflow-hidden rounded-2xl transition-all
             [box-shadow:2px_4px_12px_#00000014]
             [transform:translateX(var(--container-inset,0))]
-            hover:[box-shadow:2px_4px_16px_#00000029]
-            hover:[transform:translateX(var(--container-inset,0))_scale3d(1.01,1.01,1.01)]
+            md:hover:[box-shadow:2px_4px_16px_#00000029]
+            md:hover:[transform:translateX(var(--container-inset,0))_scale3d(1.01,1.01,1.01)]
             "
             href={`/collection/${item.id}`}
           >

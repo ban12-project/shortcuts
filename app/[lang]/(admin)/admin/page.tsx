@@ -1,6 +1,7 @@
-import Link from '#/components/link'
 import { getRequestContext } from '@cloudflare/next-on-pages'
 import type { Shortcut } from '@prisma/client'
+
+import Link from '#/components/link'
 
 export default async function AdminPage() {
   const db = getRequestContext().env.DB

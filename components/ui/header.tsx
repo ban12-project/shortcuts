@@ -16,7 +16,7 @@ export function Header({ messages }: HeaderProps) {
   const ref = useRef<React.ElementRef<'header'>>(null)
   const sentinelRef = useRef<React.ElementRef<'span'>>(null)
 
-  const [, ratio] = useInViewport(sentinelRef, {
+  const [inViewport] = useInViewport(sentinelRef, {
     threshold: 1,
   })
 
@@ -34,13 +34,13 @@ export function Header({ messages }: HeaderProps) {
       <header
         ref={ref}
         className={cn(
-          'group top-0 z-10 overflow-hidden border-neutral-100/80 pb-4 transition-all pt-safe-max-4 px-safe-max-4 dark:border-neutral-800/80 md:sticky lg:pt-safe-max-4',
+          'group top-0 z-10 overflow-hidden border-b border-transparent bg-transparent pb-4 saturate-[180%] backdrop-blur-[20px] backdrop-filter transition-colors pt-safe-max-4 px-safe-max-4 md:sticky lg:pt-safe-max-4',
           {
             sticky,
-            'border-b bg-zinc-50/80 dark:bg-zinc-950/80':
-              sticky && typeof ratio === 'number' && ratio < 1,
-            'saturate-[180%] backdrop-blur-[20px] backdrop-filter md:border-b md:bg-zinc-50/80 md:dark:bg-zinc-950/80':
-              typeof ratio === 'number' && ratio < 1,
+            'border-neutral-100/80 bg-zinc-50/80 dark:border-neutral-800/80 dark:bg-zinc-950/80':
+              sticky && !inViewport,
+            'md:border-neutral-100/80 md:bg-zinc-50/80 md:dark:border-neutral-800/80 md:dark:bg-zinc-950/80':
+              !inViewport,
           },
         )}
         data-sticky={sticky}

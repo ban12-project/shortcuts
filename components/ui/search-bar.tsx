@@ -28,9 +28,8 @@ export default function SearchBar({
 
   useEffect(() => {
     if (!buttonRef.current) return
-    const { width, marginLeft } = window.getComputedStyle(buttonRef.current)
-
-    setWidth(Number.parseFloat(width) + Number.parseFloat(marginLeft))
+    const { marginLeft } = window.getComputedStyle(buttonRef.current)
+    setWidth(buttonRef.current.offsetWidth + Number.parseFloat(marginLeft))
   }, [buttonRef])
 
   const searchParams = useSearchParams()

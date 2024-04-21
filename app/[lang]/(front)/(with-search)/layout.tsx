@@ -9,7 +9,7 @@ export default async function Layout({ params, children }: LayoutProps) {
   const messages = await getDictionary(params.lang)
   return (
     <>
-      <Header messages={messages} />
+      {<Header messages={messages} />}
       {children}
     </>
   )
