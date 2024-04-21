@@ -1,6 +1,7 @@
 import '../globals.css'
 
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import { Locale } from '#/i18n-config'
 import { ThemeProvider } from 'next-themes'
 
@@ -61,11 +62,10 @@ export default function RootLayout({
 
         {/* <!-- Cloudflare Web Analytics --> */}
         {process.env.NEXT_PUBLIC_CF_BEACON && (
-          <script
-            defer
+          <Script
             src="https://static.cloudflareinsights.com/beacon.min.js"
             data-cf-beacon={`"token": "${process.env.NEXT_PUBLIC_CF_BEACON}"`}
-          ></script>
+          />
         )}
         {/* <!-- End Cloudflare Web Analytics --> */}
       </body>
