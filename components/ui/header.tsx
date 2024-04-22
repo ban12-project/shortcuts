@@ -38,9 +38,9 @@ export function Header({ messages }: HeaderProps) {
           {
             sticky,
             'border-neutral-100/80 bg-zinc-50/80 dark:border-neutral-800/80 dark:bg-zinc-950/80':
-              sticky && !inViewport,
+              sticky && inViewport !== undefined && !inViewport,
             'md:border-neutral-100/80 md:bg-zinc-50/80 md:dark:border-neutral-800/80 md:dark:bg-zinc-950/80':
-              !inViewport,
+              inViewport !== undefined && !inViewport,
           },
         )}
         data-sticky={sticky}
@@ -53,7 +53,7 @@ export function Header({ messages }: HeaderProps) {
       </header>
       <span
         ref={sentinelRef}
-        className="pointer-events-none absolute left-0 top-0 h-[68px] w-full"
+        className="pointer-events-none absolute left-0 top-0 h-[69px] w-full"
       ></span>
     </>
   )
