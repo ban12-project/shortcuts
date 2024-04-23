@@ -407,3 +407,155 @@ export async function updateShortcut(
   revalidatePath('/admin')
   redirect('/admin')
 }
+
+const collectionSchema = z.object({
+  title: z.string().min(1),
+  image: z.string().min(1),
+})
+export async function createCollection(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  const validatedFields = collectionSchema.safeParse({
+    title: formData.get('title'),
+    image: formData.get('image'),
+  })
+
+  if (!validatedFields.success) {
+    return 'Failed to validate form data'
+  }
+
+  const { title, image } = validatedFields.data
+
+  const db = getRequestContext().env.DB
+  const result = await db
+    .prepare(
+      `INSERT INTO Collection (title, image, updatedAt) VALUES (?, ?, CURRENT_TIMESTAMP)`,
+    )
+    .bind(title, image)
+    .run()
+
+  if (!result.success) {
+    return 'Failed to insert data.'
+  }
+
+  revalidatePath('/admin')
+  redirect('/admin')
+}
+
+export async function updateCollection(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  const validatedFields = z
+    .intersection(
+      collectionSchema,
+      z.object({
+        id: z.string().min(0),
+      }),
+    )
+    .safeParse({
+      id: formData.get('id'),
+      title: formData.get('title'),
+      image: formData.get('image'),
+    })
+
+  if (!validatedFields.success) {
+    return 'Failed to validate form data'
+  }
+
+  const { id, title, image } = validatedFields.data
+
+  const db = getRequestContext().env.DB
+  const result = await db
+    .prepare(
+      `UPDATE Collection SET title = ?, image = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
+    )
+    .bind(title, image, id)
+    .run()
+
+  if (!result.success) {
+    return 'Failed to update data.'
+  }
+
+  revalidatePath('/admin')
+  redirect('/admin')
+}
+
+const albumSheetSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  collectionId: z.string().min(1),
+})
+
+export async function createAlbum(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  const validatedFields = albumSheetSchema.safeParse({
+    title: formData.get('title'),
+    description: formData.get('description'),
+    collectionId: formData.get('collectionId'),
+  })
+
+  if (!validatedFields.success) {
+    return 'Failed to validate form data'
+  }
+
+  const { title, description, collectionId } = validatedFields.data
+
+  const db = getRequestContext().env.DB
+  const result = await db
+    .prepare(
+      `INSERT INTO Album (title, description, collectionId, updatedAt) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`,
+    )
+    .bind(title, description, collectionId)
+    .run()
+
+  if (!result.success) {
+    return 'Failed to insert data.'
+  }
+
+  revalidatePath('/admin')
+  redirect('/admin')
+}
+
+export async function updateAlbum(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  const validatedFields = z
+    .intersection(
+      albumSheetSchema,
+      z.object({
+        id: z.string().min(0),
+      }),
+    )
+    .safeParse({
+      id: formData.get('id'),
+      title: formData.get('title'),
+      description: formData.get('description'),
+      collectionId: formData.get('collectionId'),
+    })
+
+  if (!validatedFields.success) {
+    return 'Failed to validate form data'
+  }
+
+  const { id, title, description, collectionId } = validatedFields.data
+
+  const db = getRequestContext().env.DB
+  const result = await db
+    .prepare(
+      `UPDATE Album SET title = ?, description = ?, collectionId = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
+    )
+    .bind(title, description, collectionId, id)
+    .run()
+
+  if (!result.success) {
+    return 'Failed to update data.'
+  }
+
+  revalidatePath('/admin')
+  redirect('/admin')
+}
