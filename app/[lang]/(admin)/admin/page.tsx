@@ -3,6 +3,11 @@ import type { Album, Collection, Shortcut } from '@prisma/client'
 
 import { cn } from '#/lib/utils'
 import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '#/components/ui/resizable'
+import {
   Table,
   TableBody,
   TableCaption,
@@ -219,23 +224,34 @@ export default async function AdminPage() {
   ])
 
   return (
-    <main className="grid h-[calc(100vh-40px)] grid-rows-3 gap-3 lg:grid-cols-3 lg:grid-rows-1">
-      <AdminTable columns={shortcutsTableColumns} data={shortcuts}>
-        <Link className="mr-2" href={`/admin/shortcut/create`}>
-          Create
-        </Link>
-      </AdminTable>
-      <AdminTable columns={collectionsTableColumns} data={collections}>
-        <Link className="mr-2" href={`/admin/collection/create`}>
-          Create
-        </Link>
-      </AdminTable>
-      <AdminTable columns={albumsTableColumns} data={albums}>
-        <Link className="mr-2" href={`/admin/album/create`}>
-          Create
-        </Link>
-      </AdminTable>
-    </main>
+    <ResizablePanelGroup
+      direction="horizontal"
+      className="max-h-[calc(100vh-40px)]"
+    >
+      <ResizablePanel defaultSize={33.33} className="[&>div]:max-h-full">
+        <AdminTable columns={shortcutsTableColumns} data={shortcuts}>
+          <Link className="mr-2" href={`/admin/shortcut/create`}>
+            Create
+          </Link>
+        </AdminTable>
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={33.33} className="[&>div]:max-h-full">
+        <AdminTable columns={collectionsTableColumns} data={collections}>
+          <Link className="mr-2" href={`/admin/collection/create`}>
+            Create
+          </Link>
+        </AdminTable>
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={33.33} className="[&>div]:max-h-full">
+        <AdminTable columns={albumsTableColumns} data={albums}>
+          <Link className="mr-2" href={`/admin/album/create`}>
+            Create
+          </Link>
+        </AdminTable>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   )
 }
 

@@ -2,7 +2,6 @@ import '../globals.css'
 
 import { auth, signOut } from '#/auth'
 import { Locale } from '#/i18n-config'
-import { PowerOff } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
 import { LocaleProvider } from '#/components/i18n'
@@ -28,10 +27,7 @@ export default async function Layout({ params, children }: RootLayoutProps) {
                 }}
                 className="ml-auto"
               >
-                <Button variant="ios">
-                  <PowerOff className="w-6" />
-                  <div className="hidden md:inline">Sign Out</div>
-                </Button>
+                <Button variant="ios">Sign Out</Button>
               </form>
             )}
           </header>

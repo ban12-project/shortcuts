@@ -6,7 +6,11 @@ import Form from '../form'
 
 export const runtime = 'edge'
 
-export default async function EditCollectionPage({ params }: { params: { id: string } }) {
+export default async function EditCollectionPage({
+  params,
+}: {
+  params: { id: string }
+}) {
   const db = getRequestContext().env.DB
   const collection = await db
     .prepare(`SELECT * FROM Collection WHERE id=?`)
