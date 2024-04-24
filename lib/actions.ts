@@ -485,7 +485,10 @@ export async function updateCollection(
 const albumSheetSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
-  collectionId: z.string().min(1),
+  collectionId: z
+    .string()
+    .optional()
+    .transform((val) => val || null),
 })
 
 export async function createAlbum(
