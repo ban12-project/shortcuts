@@ -6,6 +6,7 @@ import { getDictionary } from '#/get-dictionary'
 import { Locale } from '#/i18n-config'
 
 import AlbumList from '#/components/ui/album-list'
+import ShortcutList from '#/components/ui/shortcut-list'
 
 type CollectionsProps = {
   params: { id: string; lang: Locale }
@@ -33,7 +34,8 @@ export default async function Collections({ params }: CollectionsProps) {
                   json_group_array(json_object(
                     'id', s.id,
                     'name', s.name,
-                    'description', s.description
+                    'description', s.description,
+                    'backgroundColor', s.backgroundColor
                   ))
                 FROM Shortcut s
                 WHERE s.albumId = a.id
@@ -41,7 +43,18 @@ export default async function Collections({ params }: CollectionsProps) {
             ))
           FROM Album a
           WHERE a.collectionId = c.id
-        ) AS albums
+        ) AS albums,
+        (
+          SELECT
+            json_group_array(json_object(
+              'id', s.id,
+              'name', s.name,
+              'description', s.description,
+              'backgroundColor', s.backgroundColor
+            ))
+          FROM Shortcut s
+          WHERE s.collectionId = c.id
+        ) AS shortcuts
       FROM Collection c
       WHERE c.id = ?
     `,
@@ -59,7 +72,11 @@ export default async function Collections({ params }: CollectionsProps) {
           {collection.title}
         </h1>
       </div>
-      <AlbumList messages={messages} />
+      <AlbumList albums={JSON.parse(collection.albums)} messages={messages} />
+
+      <div className="container-full">
+        <ShortcutList shortcuts={JSON.parse(collection.shortcuts)} />
+      </div>
     </main>
   )
 }

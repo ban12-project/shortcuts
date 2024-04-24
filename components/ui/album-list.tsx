@@ -7,10 +7,11 @@ import Album from './album'
 
 type AlbumListProps = {
   messages: Messages
+  albums?: Awaited<ReturnType<typeof fetchAlbums>>
 }
 
-export default async function AlbumList({ messages }: AlbumListProps) {
-  const albums = await fetchAlbums()
+export default async function AlbumList({ messages, albums }: AlbumListProps) {
+  albums ||= await fetchAlbums()
 
   return (
     <ul className="[&>li+li_.custom-border]:border-t [@media_only_screen_and_(min-resolution:192dpi){&>li+li_.custom-border}]:border-t-[.5px]">
@@ -35,7 +36,13 @@ export default async function AlbumList({ messages }: AlbumListProps) {
               {item.description}
             </p>
           </div>
-          <Album shortcuts={JSON.parse(item.shortcuts)} />
+          <Album
+            shortcuts={
+              typeof item.shortcuts === 'string'
+                ? JSON.parse(item.shortcuts)
+                : item.shortcuts
+            }
+          />
         </li>
       ))}
     </ul>
