@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Messages } from '#/get-dictionary'
-import { useClickAway, useInViewport } from 'ahooks'
+import { useClickAway } from 'ahooks'
 
 import { cn } from '#/lib/utils'
 import SearchBar from '#/components/ui/search-bar'
@@ -13,12 +13,26 @@ type HeaderProps = {
 
 export function Header({ messages }: HeaderProps) {
   const [sticky, setSticky] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const ref = useRef<React.ElementRef<'header'>>(null)
-  const sentinelRef = useRef<React.ElementRef<'span'>>(null)
+  const sentinelRef = useRef<React.ElementRef<'div'>>(null)
 
-  const [inViewport] = useInViewport(sentinelRef, {
-    threshold: 1,
-  })
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsScrolled(!entry.isIntersecting)
+        })
+      },
+      {
+        root: null,
+        rootMargin: `0px 0px`,
+        threshold: 0,
+      },
+    )
+    observer.observe(sentinelRef.current!)
+    return () => observer.disconnect()
+  }, [])
 
   useClickAway(
     () => {
@@ -31,6 +45,7 @@ export function Header({ messages }: HeaderProps) {
 
   return (
     <>
+      <div ref={sentinelRef}></div>
       <header
         ref={ref}
         className={cn(
@@ -38,9 +53,9 @@ export function Header({ messages }: HeaderProps) {
           {
             sticky,
             'border-neutral-100/80 bg-zinc-50/80 dark:border-neutral-800/80 dark:bg-zinc-950/80':
-              sticky && inViewport !== undefined && !inViewport,
+              sticky && isScrolled,
             'md:border-neutral-100/80 md:bg-zinc-50/80 md:dark:border-neutral-800/80 md:dark:bg-zinc-950/80':
-              inViewport !== undefined && !inViewport,
+              isScrolled,
           },
         )}
         data-sticky={sticky}
@@ -51,10 +66,6 @@ export function Header({ messages }: HeaderProps) {
           className="ml-auto md:max-w-sm"
         />
       </header>
-      <span
-        ref={sentinelRef}
-        className="pointer-events-none absolute left-0 top-0 h-[69px] w-full"
-      ></span>
     </>
   )
 }
