@@ -96,6 +96,9 @@ const config: Config = {
       },
     },
   },
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   plugins: [
     require('tailwindcss-animate'),
     require('@ban12/tailwindcss-safe-area'),

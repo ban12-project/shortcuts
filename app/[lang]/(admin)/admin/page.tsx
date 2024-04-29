@@ -1,6 +1,7 @@
 import { getRequestContext } from '@cloudflare/next-on-pages'
 import type { Album, Collection, Shortcut } from '@prisma/client'
 
+import { getAlbums, getCollections, getShortcuts } from '#/lib/actions'
 import { cn } from '#/lib/utils'
 import {
   ResizableHandle,
@@ -213,14 +214,10 @@ function AdminTable<T extends Record<string, any>>({
 
 export default async function AdminPage() {
   const db = getRequestContext().env.DB
-  const [
-    { results: shortcuts },
-    { results: collections },
-    { results: albums },
-  ] = await Promise.all([
-    db.prepare(`SELECT * FROM Shortcut`).all<Shortcut>(),
-    db.prepare(`SELECT * FROM Collection`).all<Collection>(),
-    db.prepare(`SELECT * FROM Album`).all<Album>(),
+  const [shortcuts, collections, albums] = await Promise.all([
+    getShortcuts(),
+    getCollections(),
+    getAlbums(),
   ])
 
   return (

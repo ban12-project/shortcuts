@@ -1,10 +1,10 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getRequestContext } from '@cloudflare/next-on-pages'
-import type { Shortcut } from '@prisma/client'
 import { getDictionary } from '#/get-dictionary'
 
+import { fetchShortcutByID } from '#/lib/actions'
 import ShortcutAdd, { ShortcutAddProps } from '#/components/ui/shortcut-add'
+import Link from '#/components/link'
 
 export default async function ShortcutPage({
   params,
@@ -12,20 +12,22 @@ export default async function ShortcutPage({
   const messages = await getDictionary(params.lang)
 
   return (
-    <main className="flex max-h-screen flex-col">
+    <>
       <ShortcutAdd messages={messages} params={params} />
-    </main>
+
+      <div className="container-full">
+        <Link href="/" className="text-blue-500 active:text-blue-500/80">
+          {messages.common['go-home']}
+        </Link>
+      </div>
+    </>
   )
 }
 
 export async function generateMetadata({
   params,
 }: Omit<ShortcutAddProps, 'messages'>): Promise<Metadata> {
-  const db = getRequestContext().env.DB
-  const shortcut = await db
-    .prepare(`SELECT * FROM Shortcut WHERE id = ?`)
-    .bind(params.id)
-    .first<Shortcut>()
+  const shortcut = await fetchShortcutByID(params.id)
 
   if (!shortcut) notFound()
 

@@ -562,3 +562,30 @@ export async function updateAlbum(
   revalidatePath('/admin')
   redirect('/admin')
 }
+
+export async function getShortcuts() {
+  const db = getRequestContext().env.DB
+  const { results: shortcuts } = await db
+    .prepare(`SELECT * FROM Shortcut`)
+    .all<Shortcut>()
+
+  return shortcuts
+}
+
+export async function getCollections() {
+  const db = getRequestContext().env.DB
+  const { results: collections } = await db
+    .prepare(`SELECT * FROM Collection`)
+    .all<Collection>()
+
+  return collections
+}
+
+export async function getAlbums() {
+  const db = getRequestContext().env.DB
+  const { results: albums } = await db
+    .prepare(`SELECT * FROM Album`)
+    .all<Album>()
+
+  return albums
+}

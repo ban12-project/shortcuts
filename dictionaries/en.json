@@ -5,7 +5,8 @@
     "done": "Done",
     "next": "Next",
     "optional": "Optional",
-    "loading": "Loading"
+    "loading": "Loading",
+    "go-home": "Go Home"
   },
   "theme": {
     "light": "Light",
@@ -30,5 +31,9 @@
   },
   "form-name": "New Shortcut",
   "form-description": "Tell us a little bit about this shortcut",
-  "form-language": "Language used for shortcuts"
+  "form-language": "Language used for shortcuts",
+  "post": {
+    "title": "Post Shortcut",
+    "description": "Share your shortcut with the world"
+  }
 }

@@ -1,7 +1,9 @@
 import '../globals.css'
 
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
+import { getDictionary } from '#/get-dictionary'
 import { Locale } from '#/i18n-config'
 import { ThemeProvider } from 'next-themes'
 
@@ -18,14 +20,20 @@ type RootLayoutProps = {
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 
-export const metadata = {
-  title: {
-    default: 'Shortcuts',
-    template: '%s - Ban12',
-  },
+export async function generateMetadata({
+  params,
+}: RootLayoutProps): Promise<Metadata> {
+  const messages = await getDictionary(params.lang)
+
+  return {
+    title: {
+      default: messages.title,
+      template: `%s - ${process.env.SITE_NAME}`,
+    },
+  }
 }
 
-export const viewport = {
+export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
