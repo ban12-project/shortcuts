@@ -25,7 +25,9 @@ export default async function Collections({}: CollectionsProps) {
             href={`/collection/${item.id}`}
           >
             <div className="absolute p-7 text-white lg:p-[30px]">
-              <h3 className="text-2xl font-bold">{item.title}</h3>
+              <h2 className="text-2xl font-bold" aria-hidden>
+                {item.title}
+              </h2>
             </div>
             <Image
               className="aspect-[4/5] w-full object-cover transition-all"
