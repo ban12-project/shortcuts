@@ -9,7 +9,7 @@ import { signIn } from '#/auth'
 import { AuthError } from 'next-auth'
 import { z } from 'zod'
 
-import { ShortcutRecord } from '#/app/api/icloud/[uuid]/shortcut'
+import type { ShortcutRecord } from './shortcut'
 
 const icloudSchema = z.object({
   icloud: z

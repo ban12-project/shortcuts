@@ -34,7 +34,11 @@ export default async function Home({ params }: HomePageProps) {
         </Suspense>
       </main>
       <footer className="container-full flex pb-safe-max-4 lg:pb-5">
-        <Link href="/post" scroll={false}>
+        <Link
+          href="/post"
+          scroll={false}
+          aria-label={messages.post.description}
+        >
           <Share2 />
         </Link>
 

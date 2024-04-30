@@ -1,6 +1,7 @@
 import '../globals.css'
 
 import type { Metadata, Viewport } from 'next'
+import dynamic from 'next/dynamic'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import { getDictionary } from '#/get-dictionary'
@@ -10,6 +11,10 @@ import { ThemeProvider } from 'next-themes'
 import { cn } from '#/lib/utils'
 import CSSPaintPolyfill from '#/components/css-paint-polyfill'
 import { LocaleProvider } from '#/components/i18n'
+
+const SentryLoader = dynamic(() => import('#/components/sentry-loader'), {
+  ssr: false,
+})
 
 type RootLayoutProps = {
   params: { lang: Locale }
@@ -67,6 +72,8 @@ export default function RootLayout({
         </ThemeProvider>
 
         {/* <CSSPaintPolyfill /> */}
+
+        <SentryLoader />
 
         {/* <!-- Cloudflare Web Analytics --> */}
         {process.env.NEXT_PUBLIC_CF_BEACON && (
