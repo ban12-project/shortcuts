@@ -1,11 +1,10 @@
+'use client'
+
 import Script from 'next/script'
 import { SDK_VERSION } from '@sentry/nextjs'
 
-import { IN_BROWSER } from '#/lib/utils'
-
-if (IN_BROWSER) {
-  // @ts-ignore
-  window.sentryOnLoad = function () {
+export default function SentryLoader() {
+  const onLoad = () => {
     // @ts-ignore
     Sentry.init({
       dsn: 'https://f6154cad843071616a95017ace8238e7@o4507083088920576.ingest.us.sentry.io/4507083090362368',
@@ -33,13 +32,12 @@ if (IN_BROWSER) {
       ],
     })
   }
-}
 
-export default function SentryLoader() {
   return (
     <Script
       src={`https://browser.sentry-cdn.com/${SDK_VERSION}/bundle.replay.min.js`}
-      crossOrigin="anonymous"
+      async
+      onLoad={onLoad}
     />
   )
 }
