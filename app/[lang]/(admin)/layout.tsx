@@ -4,6 +4,7 @@ import { auth, signOut } from '#/auth'
 import { Locale } from '#/i18n-config'
 
 import { Button } from '#/components/ui/button'
+import { Toaster } from '#/components/ui/sonner'
 import { LocaleProvider } from '#/components/i18n'
 
 type RootLayoutProps = {
@@ -34,6 +35,8 @@ export default async function Layout({ params, children }: RootLayoutProps) {
 
           {children}
         </LocaleProvider>
+
+        <Toaster />
       </body>
     </html>
   )

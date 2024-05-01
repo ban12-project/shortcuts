@@ -9,6 +9,7 @@ import { Locale } from '#/i18n-config'
 import { ThemeProvider } from 'next-themes'
 
 import { cn } from '#/lib/utils'
+import { Toaster } from '#/components/ui/sonner'
 import CSSPaintPolyfill from '#/components/css-paint-polyfill'
 import { LocaleProvider } from '#/components/i18n'
 
@@ -70,6 +71,8 @@ export default function RootLayout({
             {post}
           </LocaleProvider>
         </ThemeProvider>
+
+        <Toaster />
 
         {/* <CSSPaintPolyfill /> */}
 
