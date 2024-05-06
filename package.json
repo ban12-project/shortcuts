@@ -78,7 +78,7 @@
     "tailwindcss": "^3.4.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
-    "wrangler": "^3.53.0"
+    "wrangler": "^3.53.1"
   },
   "prettier": {
     "arrowParens": "always",
