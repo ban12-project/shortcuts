@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
-import { getRequestContext } from '@cloudflare/next-on-pages'
-import type { Collection } from '@prisma/client'
+
+import { getPrismaWithD1 } from '#/lib/prisma'
 
 import Form from '../form'
 
@@ -11,11 +11,10 @@ export default async function EditCollectionPage({
 }: {
   params: { id: string }
 }) {
-  const db = getRequestContext().env.DB
-  const collection = await db
-    .prepare(`SELECT * FROM Collection WHERE id=?`)
-    .bind(params.id)
-    .first<Collection>()
+  const prisma = getPrismaWithD1()
+  const collection = await prisma.collection.findUnique({
+    where: { id: Number.parseInt(params.id) },
+  })
 
   if (!collection) notFound()
 

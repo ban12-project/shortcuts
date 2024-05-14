@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
-import { getRequestContext } from '@cloudflare/next-on-pages'
-import type { Album } from '@prisma/client'
+
+import { getPrismaWithD1 } from '#/lib/prisma'
 
 import Form from '../form'
 
@@ -11,11 +11,10 @@ export default async function EditAlbumPage({
 }: {
   params: { id: string }
 }) {
-  const db = getRequestContext().env.DB
-  const album = await db
-    .prepare(`SELECT * FROM Album WHERE id=?`)
-    .bind(params.id)
-    .first<Album>()
+  const prisma = getPrismaWithD1()
+  const album = await prisma.album.findUnique({
+    where: { id: Number.parseInt(params.id) },
+  })
 
   if (!album) notFound()
 

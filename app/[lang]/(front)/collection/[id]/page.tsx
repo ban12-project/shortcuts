@@ -1,10 +1,9 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getRequestContext } from '@cloudflare/next-on-pages'
-import type { Collection } from '@prisma/client'
 import { getDictionary } from '#/get-dictionary'
 import { Locale } from '#/i18n-config'
 
+import { getPrismaWithD1 } from '#/lib/prisma'
 import AlbumList from '#/components/ui/album-list'
 import ShortcutList from '#/components/ui/shortcut-list'
 
@@ -13,54 +12,21 @@ type CollectionsProps = {
 }
 
 export default async function Collections({ params }: CollectionsProps) {
-  const db = getRequestContext().env.DB
+  const prisma = getPrismaWithD1()
+
   const [messages, collection] = await Promise.all([
     getDictionary(params.lang),
-    db
-      .prepare(
-        `
-      SELECT
-        id,
-        title,
-        image,
-        (
-          SELECT
-            json_group_array(json_object(
-              'id', a.id,
-              'title', a.title,
-              'description', a.description,
-              'shortcuts', (
-                SELECT
-                  json_group_array(json_object(
-                    'id', s.id,
-                    'name', s.name,
-                    'description', s.description,
-                    'backgroundColor', s.backgroundColor
-                  ))
-                FROM Shortcut s
-                WHERE s.albumId = a.id
-              )
-            ))
-          FROM Album a
-          WHERE a.collectionId = c.id
-        ) AS albums,
-        (
-          SELECT
-            json_group_array(json_object(
-              'id', s.id,
-              'name', s.name,
-              'description', s.description,
-              'backgroundColor', s.backgroundColor
-            ))
-          FROM Shortcut s
-          WHERE s.collectionId = c.id
-        ) AS shortcuts
-      FROM Collection c
-      WHERE c.id = ?
-    `,
-      )
-      .bind(params.id)
-      .first<Collection & { albums: string; shortcuts: string }>(),
+    prisma.collection.findUnique({
+      where: { id: Number.parseInt(params.id) },
+      include: {
+        albums: {
+          include: {
+            shortcuts: true,
+          },
+        },
+        shortcuts: true,
+      },
+    }),
   ])
 
   if (!collection) notFound()
@@ -72,10 +38,10 @@ export default async function Collections({ params }: CollectionsProps) {
           {collection.title}
         </h1>
       </div>
-      <AlbumList albums={JSON.parse(collection.albums)} messages={messages} />
+      <AlbumList albums={collection.albums} messages={messages} />
 
       <div className="container-full">
-        <ShortcutList shortcuts={JSON.parse(collection.shortcuts)} />
+        <ShortcutList shortcuts={collection.shortcuts} />
       </div>
     </main>
   )
@@ -84,20 +50,10 @@ export default async function Collections({ params }: CollectionsProps) {
 export async function generateMetadata({
   params,
 }: CollectionsProps): Promise<Metadata> {
-  const db = getRequestContext().env.DB
-  const collection = await db
-    .prepare(
-      `
-    SELECT
-      id,
-      title,
-      image
-    FROM Collection c
-    WHERE c.id = ?
-  `,
-    )
-    .bind(params.id)
-    .first<Collection>()
+  const prisma = getPrismaWithD1()
+  const collection = await prisma.collection.findUnique({
+    where: { id: Number.parseInt(params.id) },
+  })
 
   if (!collection) notFound()
 

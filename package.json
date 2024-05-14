@@ -115,5 +115,10 @@
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@prisma/client@5.13.0": "patches/@prisma__client@5.13.0.patch"
+    }
   }
 }

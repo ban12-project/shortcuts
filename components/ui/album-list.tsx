@@ -36,13 +36,7 @@ export default async function AlbumList({ messages, albums }: AlbumListProps) {
               {item.description}
             </p>
           </div>
-          <Album
-            shortcuts={
-              typeof item.shortcuts === 'string'
-                ? JSON.parse(item.shortcuts)
-                : item.shortcuts
-            }
-          />
+          <Album shortcuts={item.shortcuts} />
         </li>
       ))}
     </ul>

@@ -1,19 +1,15 @@
-import { getRequestContext } from '@cloudflare/next-on-pages'
-import type { users } from '@prisma/client'
 import NextAuth, { type NextAuthConfig } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { pathToRegexp } from 'path-to-regexp'
 import { z } from 'zod'
 
 import { i18n } from './i18n-config'
+import { getPrismaWithD1 } from './lib/prisma'
 
-async function getUser(email: string): Promise<users | null> {
+async function getUser(email: string) {
   try {
-    const db = getRequestContext().env.DB
-    const user = await db
-      .prepare(`SELECT * FROM users WHERE email=?`)
-      .bind(email)
-      .first<users>()
+    const prisma = getPrismaWithD1()
+    const user = await prisma.users.findFirst({ where: { email } })
     return user
   } catch (error) {
     console.error('Failed to fetch user:', error)

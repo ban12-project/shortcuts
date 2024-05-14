@@ -2,13 +2,12 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { getRequestContext } from '@cloudflare/next-on-pages'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import type { Album, Collection, Shortcut } from '@prisma/client'
 import { signIn } from '#/auth'
 import { AuthError } from 'next-auth'
 import { z } from 'zod'
 
+import { getPrismaWithD1 } from './prisma'
 import type { ShortcutRecord } from './shortcut'
 
 const icloudSchema = z.object({
@@ -59,13 +58,10 @@ export async function getShortcutByiCloud(
     }
   }
 
-  const db = getRequestContext().env.DB
-  const exists = await db
-    .prepare(
-      `SELECT EXISTS(SELECT 1 FROM Shortcut WHERE uuid = ?) AS is_exists`,
-    )
-    .bind(uuid)
-    .first<0 | 1>('is_exists')
+  const prisma = getPrismaWithD1()
+  const exists = await prisma.shortcut.findUnique({
+    where: { uuid },
+  })
 
   if (exists) {
     return {
@@ -152,7 +148,7 @@ export async function postShortcut(prevState: State, formData: FormData) {
     }
   }
 
-  const db = getRequestContext().env.DB
+  const prisma = getPrismaWithD1()
 
   let albumId: number = NaN
   try {
@@ -163,9 +159,7 @@ export async function postShortcut(prevState: State, formData: FormData) {
     const model = genAI.getGenerativeModel({
       model: process.env.GOOGLE_GEMINI_MODEL,
     })
-    const { results: albums } = await db
-      .prepare(`SELECT * FROM Album`)
-      .all<Album>()
+    const albums = await prisma.album.findMany()
     const prompt = `Which of the following options describes "${name}, ${description}" Answer with numbers:
         Options:
         ${albums
@@ -178,14 +172,9 @@ export async function postShortcut(prevState: State, formData: FormData) {
     albumId = Number.parseInt(text)
   } catch (e) {}
 
-  const result = await db
-    .prepare(
-      `
-      INSERT INTO Shortcut (updatedAt, uuid, icloud, name, description, icon, backgroundColor, details, language, collectionId, albumId) 
-      VALUES (CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
-    `,
-    )
-    .bind(
+  const result = await prisma.shortcut.create({
+    data: {
+      updatedAt: 'CURRENT_TIMESTAMP',
       uuid,
       icloud,
       name,
@@ -194,11 +183,12 @@ export async function postShortcut(prevState: State, formData: FormData) {
       backgroundColor,
       details,
       language,
-      albumId || null,
-    )
-    .run()
+      collectionId: null,
+      albumId: albumId || null,
+    },
+  })
 
-  if (!result.success) {
+  if (!result) {
     return {
       message: 'Failed to insert data.',
     }
@@ -209,57 +199,28 @@ export async function postShortcut(prevState: State, formData: FormData) {
 }
 
 export async function fetchAlbums() {
-  const db = getRequestContext().env.DB
-  const { results: albums } = await db
-    .prepare(
-      `
-    SELECT 
-      id,
-      title,
-      description,
-      (
-        SELECT 
-          json_group_array(json_object(
-            'id', s.id,
-            'name', s.name,
-            'description', s.description,
-            'icon', s.icon,
-            'backgroundColor', s.backgroundColor
-          ))
-        FROM Shortcut s
-        WHERE s.albumId = Album.id
-      ) AS shortcuts
-    FROM Album
-    `,
-    )
-    .all<Album & { shortcuts: string }>()
+  const prisma = getPrismaWithD1()
+  const albums = await prisma.album.findMany({
+    include: {
+      shortcuts: true,
+    },
+  })
 
   return albums
 }
 
 export async function fetchCollections() {
-  const db = getRequestContext().env.DB
-  const { results: collections } = await db
-    .prepare(
-      `
-    SELECT
-      id,
-      title,
-      image
-    FROM Collection
-  `,
-    )
-    .all<Collection>()
+  const prisma = getPrismaWithD1()
+  const collections = await prisma.collection.findMany()
 
   return collections
 }
 
 export async function fetchShortcutByID(id: string) {
-  const db = getRequestContext().env.DB
-  const shortcut = await db
-    .prepare(`SELECT * FROM Shortcut WHERE id = ?`)
-    .bind(id)
-    .first<Shortcut>()
+  const prisma = getPrismaWithD1()
+  const shortcut = await prisma.shortcut.findUnique({
+    where: { id: Number.parseInt(id) },
+  })
 
   return shortcut
 }
@@ -280,22 +241,23 @@ export async function searchShortcuts(query: string) {
     }
   }
 
-  const db = getRequestContext().env.DB
-  const { results: shortcuts } = await db
-    .prepare(
-      `
-    SELECT 
-      id,
-      name,
-      description,
-      icon,
-      backgroundColor
-    FROM Shortcut
-    WHERE name LIKE ? OR description LIKE ?
-    `,
-    )
-    .bind(`%${query}%`, `%${query}%`)
-    .all<Shortcut>()
+  const prisma = getPrismaWithD1()
+  const shortcuts = await prisma.shortcut.findMany({
+    where: {
+      OR: [
+        {
+          name: {
+            contains: validatedFields.data.query,
+          },
+        },
+        {
+          description: {
+            contains: validatedFields.data.query,
+          },
+        },
+      ],
+    },
+  })
 
   return shortcuts
 }
@@ -365,27 +327,11 @@ export async function updateShortcut(
     language,
   } = validatedFields.data
 
-  const db = getRequestContext().env.DB
-  const result = await db
-    .prepare(
-      `
-      UPDATE Shortcut
-      SET
-        updatedAt = CURRENT_TIMESTAMP,
-        uuid = ?,
-        icloud = ?,
-        name = ?,
-        description = ?,
-        icon = ?,
-        backgroundColor = ?,
-        details = ?,
-        language = ?,
-        collectionId = ?,
-        albumId = ?
-      WHERE id = ?
-    `,
-    )
-    .bind(
+  const prisma = getPrismaWithD1()
+  const result = await prisma.shortcut.update({
+    where: { id: Number.parseInt(id) },
+    data: {
+      updatedAt: 'CURRENT_TIMESTAMP',
       uuid,
       icloud,
       name,
@@ -394,13 +340,12 @@ export async function updateShortcut(
       backgroundColor,
       details,
       language,
-      collectionId || null,
-      albumId || null,
-      id,
-    )
-    .run()
+      collectionId: collectionId ? Number.parseInt(collectionId) : null,
+      albumId: albumId ? Number.parseInt(albumId) : null,
+    },
+  })
 
-  if (!result.success) {
+  if (!result) {
     return 'Failed to insert data.'
   }
 
@@ -427,15 +372,16 @@ export async function createCollection(
 
   const { title, image } = validatedFields.data
 
-  const db = getRequestContext().env.DB
-  const result = await db
-    .prepare(
-      `INSERT INTO Collection (title, image, updatedAt) VALUES (?, ?, CURRENT_TIMESTAMP)`,
-    )
-    .bind(title, image)
-    .run()
+  const prisma = getPrismaWithD1()
+  const result = await prisma.collection.create({
+    data: {
+      updatedAt: 'CURRENT_TIMESTAMP',
+      title,
+      image,
+    },
+  })
 
-  if (!result.success) {
+  if (!result) {
     return 'Failed to insert data.'
   }
 
@@ -466,15 +412,17 @@ export async function updateCollection(
 
   const { id, title, image } = validatedFields.data
 
-  const db = getRequestContext().env.DB
-  const result = await db
-    .prepare(
-      `UPDATE Collection SET title = ?, image = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
-    )
-    .bind(title, image, id)
-    .run()
+  const prisma = getPrismaWithD1()
+  const result = await prisma.collection.update({
+    where: { id: Number.parseInt(id) },
+    data: {
+      updatedAt: 'CURRENT_TIMESTAMP',
+      title,
+      image,
+    },
+  })
 
-  if (!result.success) {
+  if (!result) {
     return 'Failed to update data.'
   }
 
@@ -507,15 +455,17 @@ export async function createAlbum(
 
   const { title, description, collectionId } = validatedFields.data
 
-  const db = getRequestContext().env.DB
-  const result = await db
-    .prepare(
-      `INSERT INTO Album (title, description, collectionId, updatedAt) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`,
-    )
-    .bind(title, description, collectionId)
-    .run()
+  const prisma = getPrismaWithD1()
+  const result = await prisma.album.create({
+    data: {
+      updatedAt: 'CURRENT_TIMESTAMP',
+      title,
+      description,
+      collectionId: collectionId ? Number.parseInt(collectionId) : null,
+    },
+  })
 
-  if (!result.success) {
+  if (!result) {
     return 'Failed to insert data.'
   }
 
@@ -547,15 +497,18 @@ export async function updateAlbum(
 
   const { id, title, description, collectionId } = validatedFields.data
 
-  const db = getRequestContext().env.DB
-  const result = await db
-    .prepare(
-      `UPDATE Album SET title = ?, description = ?, collectionId = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
-    )
-    .bind(title, description, collectionId, id)
-    .run()
+  const prisma = getPrismaWithD1()
+  const result = await prisma.album.update({
+    where: { id: Number.parseInt(id) },
+    data: {
+      updatedAt: 'CURRENT_TIMESTAMP',
+      title,
+      description,
+      collectionId: collectionId ? Number.parseInt(collectionId) : null,
+    },
+  })
 
-  if (!result.success) {
+  if (!result) {
     return 'Failed to update data.'
   }
 
@@ -564,28 +517,22 @@ export async function updateAlbum(
 }
 
 export async function getShortcuts() {
-  const db = getRequestContext().env.DB
-  const { results: shortcuts } = await db
-    .prepare(`SELECT * FROM Shortcut`)
-    .all<Shortcut>()
+  const prisma = getPrismaWithD1()
+  const shortcuts = await prisma.shortcut.findMany()
 
   return shortcuts
 }
 
 export async function getCollections() {
-  const db = getRequestContext().env.DB
-  const { results: collections } = await db
-    .prepare(`SELECT * FROM Collection`)
-    .all<Collection>()
+  const prisma = getPrismaWithD1()
+  const collections = await prisma.collection.findMany()
 
   return collections
 }
 
 export async function getAlbums() {
-  const db = getRequestContext().env.DB
-  const { results: albums } = await db
-    .prepare(`SELECT * FROM Album`)
-    .all<Album>()
+  const prisma = getPrismaWithD1()
+  const albums = await prisma.album.findMany()
 
   return albums
 }

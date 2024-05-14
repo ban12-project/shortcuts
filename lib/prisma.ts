@@ -8,21 +8,27 @@ import { PrismaClient } from '@prisma/client'
 // Learn more:
 // https://pris.ly/d/help/next-js-best-practices
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
+// const prismaClientSingleton = () => {
+//   return new PrismaClient()
+// }
 
-export const prisma = globalForPrisma.prisma || new PrismaClient()
+declare const globalThis: {
+  prismaGlobal: PrismaClient
+} & typeof global
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
 
-export default prisma
+// export default prisma
+
+// if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma
 
 export const getPrismaWithD1 = () => {
-  if (globalForPrisma.prisma) return globalForPrisma.prisma
+  if (globalThis.prismaGlobal) return globalThis.prismaGlobal
 
   // Initialize Prisma Client with the D1 adapter
   const adapter = new PrismaD1(getRequestContext().env.DB)
-  // @ts-ignore
-  const prisma = globalForPrisma.prisma || new PrismaClient({ adapter })
+  const prisma = globalThis.prismaGlobal || new PrismaClient({ adapter })
+  if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma
 
   return prisma
 }

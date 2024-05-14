@@ -1,4 +1,3 @@
-import { getRequestContext } from '@cloudflare/next-on-pages'
 import type { Album, Collection, Shortcut } from '@prisma/client'
 
 import { getAlbums, getCollections, getShortcuts } from '#/lib/actions'
@@ -213,7 +212,6 @@ function AdminTable<T extends Record<string, any>>({
 }
 
 export default async function AdminPage() {
-  const db = getRequestContext().env.DB
   const [shortcuts, collections, albums] = await Promise.all([
     getShortcuts(),
     getCollections(),
