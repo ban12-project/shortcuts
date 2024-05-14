@@ -3,9 +3,10 @@
 import Script from 'next/script'
 import { SDK_VERSION } from '@sentry/nextjs'
 
+declare const Sentry: typeof import('@sentry/nextjs')
+
 export default function SentryLoader() {
   const onLoad = () => {
-    // @ts-ignore
     Sentry.init({
       dsn: 'https://f6154cad843071616a95017ace8238e7@o4507083088920576.ingest.us.sentry.io/4507083090362368',
 
@@ -23,7 +24,6 @@ export default function SentryLoader() {
 
       // You can remove this option if you're not planning to use the Sentry Session Replay feature:
       integrations: [
-        // @ts-ignore
         Sentry.replayIntegration({
           // Additional Replay configuration goes in here, for example:
           maskAllText: true,
